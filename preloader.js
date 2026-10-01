@@ -31,6 +31,7 @@ waveWorker.onmessage = function(e) {
     if (e.data.type === 'complete') {
         wavePreloader.hide();
         document.querySelector('.wave-container').classList.add('success');
+        document.getElementById('waveLoadingContainer').classList.add('loaded');
     }
 };
 
