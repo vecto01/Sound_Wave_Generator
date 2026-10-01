@@ -4,12 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title id="page-title">Sound Wave Generator</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="assets/styles.css">
-    <link rel="stylesheet" href="assets/micro-animations.css">
-    <link rel="stylesheet" href="dark-theme.css">
-    <link rel="stylesheet" href="focus-styles.css">
-<style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="css/preloader.css">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/micro-animations.css">
+<link rel="stylesheet" href="assets/wave-animations.css">
+<link rel="stylesheet" href="dark-theme.css">
+<link rel="stylesheet" href="focus-styles.css">
+    <style>
+        .wave-result {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .wave-result {
+                color: var(--text-color-dark);
+            }
+        }
+        
         :root {
             --primary-color: #4CAF50;
             --secondary-color: #26A69A;
@@ -22,6 +38,7 @@
             --preloader-text-color: #666;
             --preloader-text-color-dark: #fff;
         }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--light-bg);
@@ -37,6 +54,7 @@
             padding-bottom: 1rem;
             transition: all 0.3s ease;
         }
+        
         .wave-container {
             width: 100%;
             max-width: 600px;
@@ -45,6 +63,7 @@
             position: relative;
             transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
+        
         .control-group {
             display: flex;
             flex-direction: column;
@@ -53,11 +72,13 @@
             max-width: 400px;
             margin-bottom: 1rem;
         }
+        
         button, input {
             padding: 0.5rem;
             border-radius: 4px;
             border: 1px solid #ccc;
         }
+        
         button {
             width: 100%;
             text-align: center;
@@ -70,106 +91,25 @@
             cursor: pointer;
             font-size: 0.9rem;
         }
+        
         button:hover, button:focus-visible {
             transform: translateY(-2px);
             background-color: #45a049;
         }
+        
         button:focus-visible {
             outline: 2px solid #4CAF50;
             outline-offset: 2px;
         }
+        
         .hidden {
             display: none;
         }
+        
         #preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(var(--light-bg-r), var(--light-bg-g), var(--light-bg-b), 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-        #preloader.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #preloader-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--spinner-color);
-            animation: spin 1s ease-in-out infinite;
-            margin-bottom: 1rem;
-        }
-        #preloader-text {
-            color: var(--preloader-text-color);
-            font-size: 1.2rem;
-            text-align: center;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: var(--dark-bg);
-                color: var(--text-color-dark);
-            }
-            .wave-container {
-                background-color: #1a1a1a;
-            }
-            #preloader {
-                background: rgba(var(--dark-bg-r), var(--dark-bg-g), var(--dark-bg-b), 0.9);
-            }
-            #preloader-text {
-                color: var(--preloader-text-color-dark);
-            }
-            #preloader-spinner {
-                border-top-color: var(--spinner-color-dark);
-            }
-            .control-group label {
-                color: var(--text-color-dark);
-            }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            touch-action: manipulation;
-            min-width: 200px;
-        }
-
-        .control-group label {
-            margin-right: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .value-display {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            margin-left: 0.5rem;
-        }
-
-        .fallback-content {
             display: none;
-            color: #666;
-            font-size: 1rem;
         }
-
+        
         .wave-container {
             aspect-ratio: 16/9;
             margin: 1rem auto;
@@ -182,18 +122,56 @@
             overflow: hidden;
             position: relative;
         }
-
+        
         canvas {
             will-change: transform;
+            background: linear-gradient(to right, #4CAF50, #26A69A);
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
-
-        .loading-message {
+        
+        .wave-container {
+            aspect-ratio: 16/9;
+            margin: 1rem auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        #waveLoading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--primary-color);
+        }
+        
+        .wave-result {
             display: none;
-            color: #666;
-            font-size: 1rem;
             text-align: center;
+            margin-top: 1rem;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            animation: fadeIn 0.5s ease;
         }
-
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        #preloader-message {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+        
         @media (max-width: 768px) {
             .button-group {
                 flex-direction: column;
@@ -257,11 +235,31 @@
             canvas = document.getElementById('waveCanvas');
             ctx = canvas.getContext('2d');
             document.getElementById('waveLoading').classList.add('active');
+            const waveLoadingDiv = document.getElementById('waveLoading');
+            if (!waveLoadingDiv.querySelector('#waveContainerText')) {
+                const textDiv = document.createElement('div');
+                textDiv.id = 'waveContainerText';
+                textDiv.textContent = 'Generating waveform will appear here';
+                waveLoadingDiv.appendChild(textDiv);
+            }
+            document.getElementById('waveLoading').classList.add('active');
+            document.getElementById('preloader').classList.remove('hidden');
+            document.getElementById('preloader-message').textContent = 'Generating waveform...';
+            canvas.style.opacity = '0';
+            canvas.style.transform = 'scaleY(0)';
+            
             waveWorker = new Worker('wave-renderer.worker.js');
             waveWorker.postMessage({ type: 'init', canvas, ctx });
+            
             waveWorker.onmessage = function(e) {
                 if (e.data.type === 'complete') {
                     document.getElementById('waveLoading').classList.remove('active');
+                    document.getElementById('preloader').classList.add('hidden');
+                    document.getElementById('waveResult').classList.remove('hidden');
+                    document.getElementById('waveResult').classList.add('visible');
+                    document.getElementById('waveResult').textContent = 'Wave generated successfully!';
+                    canvas.style.opacity = '1';
+                    canvas.style.transform = 'scaleY(1)';
                 }
             };
         }
@@ -280,11 +278,10 @@
         // Настройка событий для слайдеров
         document.getElementById('frequency').addEventListener('input', function() {
             updateWave();
-            wavePreloader.saveSettings();
         });
+        
         document.getElementById('amplitude').addEventListener('input', function() {
             updateWave();
-            wavePreloader.saveSettings();
         });
         
         // Обработка клавиатуры
@@ -336,7 +333,6 @@
                     };
                     
                     localStorage.setItem('waveSettings', JSON.stringify(settings));
-                    wavePreloader.saveSettings();
                     alert('Настройки успешно сохранены!');
                 } catch (error) {
                     alert('Ошибка сохранения настроек: ' + error.message);
@@ -356,8 +352,6 @@
                     document.getElementById('frequency').value = frequency;
                     document.getElementById('amplitude').value = amplitude;
                     updateDisplayValues();
-                    wavePreloader.settings.frequency = frequency;
-                    wavePreloader.settings.amplitude = amplitude;
                 }
             }
         } catch (error) {
@@ -370,7 +364,6 @@
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme) {
                 document.documentElement.setAttribute('data-theme', savedTheme);
-                wavePreloader.settings.colorScheme = savedTheme;
             }
         } catch (error) {
             console.error('Ошибка загрузки темы:', error.message);
@@ -383,91 +376,47 @@
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
-                wavePreloader.settings.colorScheme = newTheme;
-                wavePreloader.saveTheme();
                 alert('Тема успешно изменена на ' + newTheme);
             } catch (error) {
                 alert('Ошибка при сохранении темы: ' + error.message);
             }
         });
-        
-        // Проверка prefers-color-scheme
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-        if (prefersDark.matches) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            wavePreloader.settings.colorScheme = 'dark';
-        }
-        
-        // Инициализация
-        initWaveCanvas();
-        updateDisplayValues();
-        
-        // Функция экспорта в PNG
-        document.getElementById('exportPngBtn').addEventListener('click', function() {
-            const canvas = document.getElementById('waveCanvas');
-            html2canvas(canvas).then(function(canvas) {
-                const link = document.createElement('a');
-                link.download = 'wave-' + new Date().toISOString().slice(0, 19).replace('T', '_') + '.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        });
-        
-        // Функция экспорта в SVG
-        document.getElementById('exportSvgBtn').addEventListener('click', function() {
-            const canvas = document.getElementById('waveCanvas');
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttribute('width', canvas.width);
-            svg.setAttribute('height', canvas.height);
-            svg.setAttribute('viewBox', '0 0 ' + canvas.width + ' ' + canvas.height);
-            
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const image = document.createElementNS(svgNS, 'image');
-            image.setAttribute('href', canvas.toDataURL('image/png'));
-            image.setAttribute('width', canvas.width);
-            image.setAttribute('height', canvas.height);
-            svg.appendChild(image);
-            
-            const link = document.createElement('a');
-            link.download = 'wave-' + new Date().toISOString().slice(0, 19).replace('T', '_') + '.svg';
-            link.href = URL.createObjectURL(new Blob([svg.outerHTML], { type: 'image/svg+xml' }));
-            link.click();
-        });
     </script>
 </head>
 <body>
-    <div class="app">
-        <div class="wave-container" aria-hidden="true">
-            <div class="wave-loading-container" id="waveLoadingContainer">
-                <div class="wave-loading" id="waveLoading">
-                    <div class="spinner"></div>
-                    <p>Generating waveform...</p>
-                </div>
-            </div>
-            <canvas id="waveCanvas"></canvas>
-        </div>
-        <div class="controls">
-            <div class="button-group">
-                <button id="themeToggleBtn" aria-label="Toggle dark/light theme">Toggle Theme</button>
-            </div>
-            <div class="control-group">
-                <label for="frequency" id="frequency-label">Frequency (Hz):</label>
-                <input type="range" id="frequency" min="20" max="2000" value="440" role="slider" aria-labelledby="frequency-label" aria-valuemin="20" aria-valuemax="2000" aria-valuenow="440" aria-describedby="frequency-value">
-                <span class="value-display" id="frequency-value">440</span>
-            </div>
-            <div class="control-group">
-                <label for="amplitude" id="amplitude-label">Amplitude:</label>
-                <input type="range" id="amplitude" min="0" max="100" value="50" role="slider" aria-labelledby="amplitude-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-describedby="amplitude-value">
-                <span class="value-display" id="amplitude-value">50</span>
-            </div>
-            <div class="button-group">
-                <button id="generateBtn" aria-label="Generate sound wave">Generate Wave</button>
-                <button id="saveBtn" aria-label="Save current settings to local storage">Save Settings</button>
-                <button id="exportPngBtn" aria-label="Export wave as PNG image">Export as PNG</button>
-                <button id="exportSvgBtn" aria-label="Export wave as SVG image">Export as SVG</button>
-            </div>
-        </div>
+    <div id="preloader" class="hidden">
+        <div id="preloader-spinner"></div>
+        <div id="preloader-text">Loading...</div>
+        <div id="preloader-message"></div>
     </div>
-    <script src="preloader.js"></script>
+    
+    <div class="control-group">
+        <label>Frequency (Hz)</label>
+        <input type="range" id="frequency" min="20" max="2000" value="440" aria-valuemin="20" aria-valuemax="2000">
+        <span class="value-display" id="frequency-value">440</span>
+    </div>
+    
+    <div class="control-group">
+        <label>Amplitude</label>
+        <input type="range" id="amplitude" min="10" max="100" value="50" aria-valuemin="10" aria-valuemax="100">
+        <span class="value-display" id="amplitude-value">50</span>
+    </div>
+    
+    <button id="generateBtn">Generate Wave</button>
+    
+    <div class="wave-container">
+        <canvas id="waveCanvas" width="600" height="300"></canvas>
+        <div id="waveLoading" class="loading-message">Generating waveform...</div>
+    </div>
+    
+    <div id="waveResult" class="wave-result"></div>
+    
+    <div class="button-group">
+        <button id="saveBtn">Save Settings</button>
+        <button id="exportPngBtn">Export as PNG</button>
+        <button id="exportSvgBtn">Export as SVG</button>
+    </div>
+    
+    <button id="themeToggleBtn">Toggle Theme</button>
 </body>
 </html>
