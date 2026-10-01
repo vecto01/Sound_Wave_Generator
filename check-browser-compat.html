@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browser Compatibility Check</title>
+    <script>
+        function checkBrowserCompatibility() {
+            const features = {
+                'css-animations': 'CSS Animations',
+                'requestAnimationFrame': 'requestAnimationFrame',
+                'localStorage': 'localStorage',
+                'flexbox': 'Flexbox',
+                'grid': 'CSS Grid',
+                'touch-events': 'Touch Events'
+            };
+
+            const checkFeature = (feature) => {
+                try {
+                    if (feature === 'localStorage') {
+                        return 'localStorage' in window && window.localStorage !== null;
+                    } else if (feature === 'requestAnimationFrame') {
+                        return 'requestAnimationFrame' in window;
+                    } else if (feature === 'CSS Animations') {
+                        return 'CSSAnimationEvent' in window;
+                    } else if (feature === 'Flexbox') {
+                        return 'flex' in document.documentElement.style;
+                    } else if (feature === 'CSS Grid') {
+                        return 'CSSGridLayout' in window;
+                    } else if (feature === 'Touch Events') {
+                        return 'ontouchstart' in window;
+                    }
+                } catch (e) {
+                    return false;
+                }
+            };
+
+            const results = {};
+            for (const [feature, name] of Object.entries(features)) {
+                results[name] = checkFeature(feature);
+            }
+
+            const output = document.getElementById('output');
+            output.innerHTML = '<h2>=== Browser Compatibility Check ===' + '</h2>';
+            for (const [name, supported] of Object.entries(results)) {
+                output.innerHTML += `<p>${name}: ${supported ? '✅ Supported' : '❌ Not Supported'}</p>`;
+            }
+
+            return results;
+        }
+
+        // Запуск проверки при загрузке страницы
+        window.onload = function() {
+            checkBrowserCompatibility();
+        };
+    </script>
+</head>
+<body>
+    <div id="output"></div>
+</body>
+</html>

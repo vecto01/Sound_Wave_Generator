@@ -1,31 +1,215 @@
 .preloader {
     position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 150px;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+    aria-live: "polite";
+    aria-busy: "true";
+    animation: fadeOut 0.5s ease-out forwards;
+}
+}
+
+
+
+/* Медиа-запросы для адаптивности */
+
+@media (max-width: 768px) {
+    .preloader {
+        width: 250px;
+        height: 120px;
+    }
+    .preloader-progress {
+        width: 90%;
+        height: 6px;
+    }
+    .preloader-progress-bar {
+        height: 100%;
+        transition: width 0.4s ease-out;
+    }
+}
+
+@media (max-width: 480px) {
+    .preloader {
+        width: 200px;
+        height: 100px;
+    }
+    .preloader-progress {
+        width: 95%;
+        height: 4px;
+    }
+    .preloader-progress-bar {
+        height: 100%;
+        transition: width 0.3s ease-out;
+    }
+}
+
+
+/* Эффекты анимации */
+
+.preloader-progress-bar.complete {
+    background-color: #2ecc71;
+    animation: pulse 0.5s ease-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.preloader.active {
+    opacity: 1;
+    pointer-events: all;
+    aria-busy: "false";
+}
+
+.loading {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+
+.loading.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Preloader стили */
+.preloader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
 }
 
-.preloader.active {
+.preloader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+
+.preloader-overlay.dark {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.preloader-overlay.active {
     opacity: 1;
+    pointer-events: all;
+}
+
+.preloader-content {
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
 }
 
 .spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(0, 0, 0, 0.1);
+    width: 64px;
+    height: 64px;
+    border: 6px solid rgba(76, 175, 80, 0.2);
     border-radius: 50%;
     border-top-color: #4CAF50;
-    animation: spin 1s ease-in-out infinite;
+    animation: spin 1.5s linear infinite;
+    margin-bottom: 15px;
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2);
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: #fff;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.loading-text {
+    color: #4CAF50;
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 15px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.preloader-overlay.active .loading-text {
+    opacity: 1;
+}
+
+.spinner {
+    display: none;
+}
+
+.preloader-overlay.active .spinner {
+    display: block;
+}
+
+.preloader-svg {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    display: block;
+}
+
+.preloader-svg svg {
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

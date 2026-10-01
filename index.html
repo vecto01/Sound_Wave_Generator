@@ -2,777 +2,323 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound Wave Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title id="page-title">Sound Wave Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="assets/preloader.css">
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="dark-theme.css">
+    <link rel="stylesheet" href="focus-styles.css">
     <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #26A69A;
+            --text-color: #333;
+            --light-bg: #f9f9f9;
+            --dark-bg: #121212;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            background-color: #f0f0f0;
-            color: #333;
-            transition: background-color 0.3s;
-            padding: 20px;
+            overflow-x: hidden;
         }
-        body.dark {
-            background-color: #121212;
-            color: #f0f0f0;
-        }
-        .container {
-            width: 90%;
-            max-width: 800px;
-            padding: 20px;
-            text-align: center;
-            box-sizing: border-box;
-        }
-        h1 {
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        #wave-canvas {
-            width: 100%;
-            height: 300px;
+        .wave-container {
+            width: clamp(300px, 80vw, 600px);
+            height: clamp(200px, 10vh, 300px);
+            aspect-ratio: 16/9;
+            margin: 1rem auto;
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            border: 1px solid #eee;
-            transition: transform 0.3s ease;
-        }
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            opacity: 1;
-            will-change: transform, opacity;
-            margin: 0 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        .fallback-content {
+            display: none;
+            color: #666;
+            font-size: 1rem;
+        }
+        .value-display {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+        .control-group {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .control-group label {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+        input[type="range"] {
+            width: 100%;
+            touch-action: manipulation;
+            min-width: 200px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        button {
+            padding: 0.6rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
         }
         button:hover {
             background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
-        button:active {
-            transform: scale(0.98);
-            animation: press 0.1s ease-out;
+        button:focus-visible {
+            outline: 2px solid #4CAF50;
+            outline-offset: 2px;
         }
-
-        @keyframes press {
-            0% { transform: scale(1); }
-            100% { transform: scale(0.98); }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: var(--dark-bg);
+                color: #e0e0e0;
+            }
+            .wave-container {
+                background-color: #222;
+            }
         }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        button.dark {
-            background-color: #2ecc71;
-            color: #fff;
-        }
-        button.dark:hover {
-            background-color: #27ae60;
-        }
-
-        button.loading::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 6px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-
-        button.loading {
-            cursor: wait;
-            opacity: 0.8;
-        }
-
-        .controls-sliders {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 10px 0;
-            width: 80%;
-        }
-        .controls-sliders label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-        #frequency-value, #amplitude-value {
-            margin-top: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .slider {
-            width: 100%;
-            margin: 5px 0;
-        }
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #fff;
-            cursor: pointer;
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            will-change: transform;
         }
-        .slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            background: #fff;
-            cursor: pointer;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        
+        .wave-container {
+            will-change: transform;
         }
-        .slider::-ms-thumb {
-            width: 18px;
-            height: 18px;
-            background: #fff;
-            cursor: pointer;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        
+        canvas {
+            will-change: transform;
         }
-
-        .file-upload {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .file-upload:hover {
-            background-color: #45a049;
-        }
-
-        .file-upload-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-        }
-
-        .file-upload-text {
-            margin-right: 8px;
-            color: white;
-        }
-
-        .file-upload-icon {
-            width: 1.2em;
-            height: 1.2em;
-            fill: white;
-        }
-
-        .error {
-            color: #f44336;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .footer {
-            margin-top: 20px;
-            padding: 10px 0;
-            text-align: center;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            color: #666;
-        }
-
-        .footer-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-        .loading.active {
-            opacity: 1;
-        }
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(76, 175, 80, 0.2);
-            border-radius: 50%;
-            border-top-color: #4CAF50;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        .loading-text {
-            font-size: 16px;
-            color: #4CAF50;
-            margin: 0;
-            animation: pulse 1.5s infinite alternate;
-        }
-
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .save-message {
-            padding: 8px 12px;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 4px;
-            margin: 10px auto;
-            width: 200px;
-            text-align: center;
-            font-size: 14px;
-            animation: fadeInOut 2s;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* Анимация для ползунков */
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #4CAF50;
-            cursor: pointer;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
-        }
-        .slider::-webkit-slider-thumb:hover {
-            background: #2E7D32;
-            transform: scale(1.1);
-        }
-
-        /* Анимация для кнопок */
-        button {
-            transition: all 0.2s ease;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-
-        /* Адаптивные отступы */
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                align-items: center;
-            }
-            button {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            .file-upload {
-                width: 100%;
-            }
-        }
-
-        /* Улучшение контрастности */
-        h1 {
-            color: #2C3E50;
-            font-weight: 700;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Контрастность текста */
-        .controls-sliders label,
-        #frequency-value,
-        #amplitude-value {
-            color: #2C3E50;
-            font-weight: 500;
-        }
-
-        /* Анимации для кнопок */
-        button {
-            transition: all 0.2s ease;
-            border-radius: 4px;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-
-        /* Анимации для ползунков */
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #4CAF50;
-            cursor: pointer;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
-        }
-        .slider::-webkit-slider-thumb:hover {
-            background: #2E7D32;
-            transform: scale(1.1);
-        }
-        .slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            background: #4CAF50;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-        .slider::-moz-range-thumb:hover {
-            background: #2E7D32;
-            transform: scale(1.1);
-        }
-
-        /* Адаптивные отступы и размеры */
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            button {
-                width: 100%;
-                margin-bottom: 8px;
-            }
-            .file-upload {
-                width: 100%;
-            }
-            #frequency-value, #amplitude-value {
-                font-size: 14px;
-            }
-        }
-
-        /* Новые стили для улучшения интерфейса */
-        h1 {
-            color: #000000;
-            font-weight: 700;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-            text-align: center;
-        }
-
-        /* Контрастность текста */
-        .controls-sliders label,
-        #frequency-value,
-        #amplitude-value {
-            color: #2C3E50;
-            font-weight: 500;
-        }
-
-        /* Слайдеры с метками */
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #1976D2;
-            cursor: pointer;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
-        }
-        .slider::-webkit-slider-thumb:hover {
-            background: #0D47A1;
-            transform: scale(1.1);
-        }
-
-        /* Метки для слайдеров */
-        .slider::-webkit-slider-runnable-track {
-            height: 4px;
-            background: #E0E0E0;
-            border-radius: 2px;
-        }
-        .slider::-moz-range-track {
-            height: 4px;
-            background: #E0E0E0;
-            border-radius: 2px;
-        }
-
-        /* Анимации для кнопок */
-        button {
-            transition: all 0.2s ease;
-            border-radius: 4px;
-            font-weight: 500;
-            padding: 12px 20px;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-
-        /* Кнопка Play */
-        #play-sound-btn {
-            background: #1976D2;
-            color: white;
-            border: none;
-            width: auto;
-        }
-        #play-sound-btn:hover {
-            background: #0D47A1;
-        }
-
-        /* Поле загрузки файла */
-        .file-upload {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 12px;
-            transition: all 0.2s ease;
-        }
-        .file-upload:hover {
-            border-color: #1976D2;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Футер */
-        .footer {
-            margin-top: 20px;
-            padding: 10px 0;
-            text-align: center;
-            border-top: 1px solid #eee;
+        
+        .loading-message {
+            display: none;
             color: #666;
-            font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            button {
-                width: 100%;
-                margin-bottom: 8px;
-            }
-            .file-upload {
-                width: 100%;
-            }
-            #frequency-value, #amplitude-value {
-                font-size: 14px;
-            }
-        }
-        .wave-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            position: relative;
-            transition: all 0.3s ease;
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .wave-axes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .wave-axes line {
-            stroke: #ccc;
-            stroke-width: 1;
-        }
-
-        .wave-axes .x-axis {
-            stroke: #ccc;
-        }
-
-        .wave-axes .y-axis {
-            stroke: #ccc;
-        }
-
-        .wave-axes .x-grid {
-            stroke: #eee;
-            stroke-dasharray: 5, 5;
-        }
-
-        .wave-axes .y-grid {
-            stroke: #eee;
-            stroke-dasharray: 5, 5;
-        }
-
-        @media (max-width: 1200px) {
-            .controls {
-                gap: 12px;
-            }
-            button {
-                padding: 10px 20px;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-            #wave-canvas {
-                height: 200px;
-            }
-            h1 {
-                font-size: 20px;
-            }
-            .controls {
-                flex-direction: column;
-                align-items: center;
-            }
-            button {
-                width: 100%;
-                max-width: 250px;
-                margin-bottom: 8px;
-            }
-            .file-upload {
-                width: 100%;
-            }
-            .controls-sliders {
-                width: 100%;
-                margin: 10px 0;
-            }
+            font-size: 1rem;
+            text-align: center;
         }
     </style>
-</head>
-    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
-    <script src="audio.js"></script>
-<body>
-<div class="preloader active" id="preloader"></div>
-    <div class="container">
-        <h1>Sound Wave Generator</h1>
-        <div class="controls">
-            <button id="generate-btn" class="btn">Generate Wave</button>
-            <button id="save-preset-btn" class="btn">Save Preset</button>
-            <button id="load-preset-btn" class="btn">Load Preset</button>
-            <button id="random-wave-btn" class="btn">Random Wave</button>
-            <div class="controls-sliders">
-                <label for="frequency-slider">Frequency:</label>
-                <input type="range" id="frequency-slider" min="1" max="20" value="5" class="slider">
-                <span id="frequency-value">5</span>
-            </div>
-            <div class="controls-sliders">
-                <label for="amplitude-slider">Amplitude:</label>
-                <input type="range" id="amplitude-slider" min="10" max="150" value="100" class="slider">
-                <span id="amplitude-value">100</span>
-            </div>
-            <button id="clear-btn" class="btn">Clear</button>
-            <button id="play-sound-btn" class="btn">Play Sound</button>
-            <button id="stop-sound-btn" class="btn" disabled>Stop Sound</button>
-            <div class="file-upload">
-                <label for="file-input" class="file-upload-label">
-                    <span class="file-upload-text">Upload Audio File</span>
-                    <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                </label>
-                <input type="file" id="file-input" accept="audio/*" class="file-upload-input">
-            </div>
-        </div>
-        <div id="error-message" class="error" style="display: none;"></div>
-        <div id="save-message" class="save-message" style="display: none;">Settings saved!</div>
-        <div id="loading" class="loading">
-            <div class="wave-container">
-                <div class="spinner"></div>
-                <p class="loading-text">Generating wave...</p>
-            </div>
-        </div>
-        <div id="wave-container" class="wave-container" style="display: none;"></div>
-        <footer class="footer">
-            <div class="footer-content">
-                <p>© 2023 Sound Wave Generator</p>
-            </div>
-        </footer>
-        </div>
-        <div id="wave-container" class="wave-container" style="display: none;">
-            <svg class="wave-axes" width="100%" height="100%">
-                <line class="x-axis" x1="0" y1="150" x2="100%" y2="150" stroke="#ccc" stroke-width="1"/>
-                <line class="y-axis" x1="50%" y1="0" x2="50%" y2="100%" stroke="#ccc" stroke-width="1"/>
-                <line class="x-grid" x1="0" y1="150" x2="100%" y2="150" stroke="#eee" stroke-dasharray="5, 5"/>
-                <line class="y-grid" x1="50%" y1="0" x2="50%" y2="100%" stroke="#eee" stroke-dasharray="5, 5"/>
-            </svg>
-            <canvas id="wave-canvas"></canvas>
-        </div>
-        <footer class="footer">© 2023 Sound Wave Generator</footer>
-    </div>
-    <script>
-        const canvas = document.getElementById('wave-canvas');
-        const ctx = canvas.getContext('2d');
-        const generateBtn = document.getElementById('generate-btn');
-        const clearBtn = document.getElementById('clear-btn');
-        const fileInput = document.getElementById('file-input');
-        const errorMessage = document.getElementById('error-message');
-        const loadingDiv = document.getElementById('loading');
-        const waveContainer = document.getElementById('wave-container');
-
-let frequency = parseInt(localStorage.getItem('frequency')) || 5;
-        let amplitude = parseInt(localStorage.getItem('amplitude')) || 100;
-
-        document.getElementById('frequency-slider').value = frequency;
-        document.getElementById('frequency-value').textContent = frequency;
-        document.getElementById('amplitude-slider').value = amplitude;
-        document.getElementById('amplitude-value').textContent = amplitude;
-
-        // Сохранение настроек при изменении слайдеров
-        document.getElementById('frequency-slider').addEventListener('input', function() {
-            frequency = parseInt(this.value);
-            document.getElementById('frequency-value').textContent = frequency;
-            saveSettings();
-
-        function saveSettings() {
-            localStorage.setItem('frequency', frequency);
-            localStorage.setItem('amplitude', amplitude);
-            const saveMessage = document.getElementById('save-message');
-            saveMessage.style.display = 'block';
-            setTimeout(() => {
-                saveMessage.style.display = 'none';
-            }, 2000);
-        }
-        });
-
-        document.getElementById('amplitude-slider').addEventListener('input', function() {
-            amplitude = parseInt(this.value);
-            document.getElementById('amplitude-value').textContent = amplitude;
-            saveSettings();
-        });
-        function saveSettings() {
-            localStorage.setItem('frequency', frequency);
-            localStorage.setItem('amplitude', amplitude);
-        }
-
-        let animationFrameId = null;
-
-        function drawWave() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#4CAF50';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-
-            const centerY = canvas.height / 2;
-            ctx.moveTo(0, centerY);
-
-            const step = window.devicePixelRatio > 1 ? 2 : 1;
-            for (let x = 0; x <= canvas.width; x += step) {
-                const y = centerY + Math.sin(x / frequency * 0.05) * amplitude * 0.01;
-                ctx.lineTo(x, y);
-            }
-
-            ctx.stroke();
-            animationFrameId = requestAnimationFrame(drawWave);
-        }
-
-        function startAnimation() {
-            drawWave();
-        }
-
-        function stopAnimation() {
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-            }
-        }
-
-        generateBtn.addEventListener('click', function() {
-            frequency = parseInt(document.getElementById('frequency-slider').value);
-            amplitude = parseInt(document.getElementById('amplitude-slider').value);
-            saveSettings();
-
-            loadingDiv.classList.add('active');
-            waveContainer.style.display = 'none';
-            setTimeout(() => {
-                loadingDiv.classList.remove('active');
-                waveContainer.style.display = 'block';
-                startAnimation();
-            }, 1000);
-        });
-
-        clearBtn.addEventListener('click', function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stopAnimation();
-        });
-
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                audioContext.decodeAudioData(event.target.result).then(function(buffer) {
-                    // Handle audio buffer here
-                }).catch(function(error) {
-                    console.error('Error decoding audio data', error);
-                });
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="polyfills.js"></script>
+<script>
+        // Функция debounce для оптимизации слайдеров
+        function debounce(func, delay) {
+            let timeoutId;
+            return function() {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(func, delay);
             };
-            reader.readAsArrayBuffer(file);
+        }
+        
+        // Загрузка локализации
+        const locales = JSON.parse(document.getElementById('locales').textContent);
+        let currentLanguage = localStorage.getItem('language') || 'en';
+        document.documentElement.lang = currentLanguage;
+        
+        // Проверка prefers-reduced-motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+            document.body.classList.add('reduced-motion');
+        }
+        
+        // Инициализация Web Worker
+        let waveWorker;
+        let canvas, ctx;
+        
+        // Фокусируемые элементы
+        const focusableElements = [
+            document.getElementById('frequency'),
+            document.getElementById('amplitude'),
+            document.getElementById('generateBtn'),
+            document.getElementById('saveBtn'),
+            document.getElementById('exportPngBtn'),
+            document.getElementById('exportSvgBtn')
+        ];
+        
+        // Навигация по клавиатуре
+        let currentFocusIndex = 0;
+        function focusNextElement() {
+            currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
+            focusableElements[currentFocusIndex].focus();
+        }
+        
+        function focusPrevElement() {
+            currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
+            focusableElements[currentFocusIndex].focus();
+        }
+        
+        function initWaveCanvas() {
+            canvas = document.getElementById('waveCanvas');
+            ctx = canvas.getContext('2d');
+            document.getElementById('waveLoading').classList.add('active');
+            waveWorker = new Worker('wave-renderer.worker.js');
+            waveWorker.postMessage({ type: 'init', canvas, ctx });
+            waveWorker.onmessage = function(e) {
+                if (e.data.type === 'complete') {
+                    document.getElementById('waveLoading').classList.remove('active');
+                }
+            };
+        }
+        
+        // Обработка изменения слайдеров с debounce
+        const updateWave = debounce(function() {
+            const frequency = document.getElementById('frequency').value;
+            const amplitude = document.getElementById('amplitude').value;
+            document.getElementById('frequency').setAttribute('aria-valuenow', frequency);
+            document.getElementById('amplitude').setAttribute('aria-valuenow', amplitude);
+            document.getElementById('frequency-value').textContent = frequency;
+            document.getElementById('amplitude-value').textContent = amplitude;
+            waveWorker.postMessage({ type: 'update', frequency, amplitude });
+        }, 100);
+        
+        // Настройка событий для слайдеров
+        document.getElementById('frequency').addEventListener('input', updateWave);
+        document.getElementById('amplitude').addEventListener('input', updateWave);
+        
+        // Обработка клавиатуры
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    focusPrevElement();
+                } else {
+                    focusNextElement();
+                }
+            } else if (e.key === 'Escape') {
+                document.getElementById('frequency').focus();
+            }
+        });
+        
+        // Обновление отображаемых значений
+        function updateDisplayValues() {
+            const frequency = document.getElementById('frequency');
+            const amplitude = document.getElementById('amplitude');
+            frequency.setAttribute('aria-valuenow', frequency.value);
+            amplitude.setAttribute('aria-valuenow', amplitude.value);
+            document.getElementById('frequency-value').textContent = frequency.value;
+            document.getElementById('amplitude-value').textContent = amplitude.value;
+        }
+        
+        // Генерация волны
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            initWaveCanvas();
+            updateDisplayValues();
+        });
+        
+        // Сохранение настроек
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const settings = {
+                frequency: document.getElementById('frequency-slider').value,
+                amplitude: document.getElementById('amplitude-slider').value
+            };
+            localStorage.setItem('waveSettings', JSON.stringify(settings));
+        });
+        
+        // Загрузка настроек
+        const savedSettings = localStorage.getItem('waveSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            document.getElementById('frequency-slider').value = settings.frequency;
+            document.getElementById('amplitude-slider').value = settings.amplitude;
+            updateDisplayValues();
+        }
+        
+        // Инициализация
+        initWaveCanvas();
+        updateDisplayValues();
+
+        // Функция экспорта в PNG
+        document.getElementById('exportPngBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('waveCanvas');
+            html2canvas(canvas).then(function(canvas) {
+                const link = document.createElement('a');
+                link.download = 'wave-' + new Date().toISOString().slice(0, 19).replace('T', '_') + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize wave container
-            waveContainer.style.display = 'none';
+        // Функция экспорта в SVG
+        document.getElementById('exportSvgBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('waveCanvas');
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', canvas.width);
+            svg.setAttribute('height', canvas.height);
+            svg.setAttribute('viewBox', '0 0 ' + canvas.width + ' ' + canvas.height);
+
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const image = document.createElementNS(svgNS, 'image');
+            image.setAttribute('href', canvas.toDataURL('image/png'));
+            image.setAttribute('width', canvas.width);
+            image.setAttribute('height', canvas.height);
+            svg.appendChild(image);
+
+            const link = document.createElement('a');
+            link.download = 'wave-' + new Date().toISOString().slice(0, 19).replace('T', '_') + '.svg';
+            link.href = URL.createObjectURL(new Blob([svg.outerHTML], { type: 'image/svg+xml' }));
+            link.click();
         });
     </script>
+</head>
+<body>
+    <div class="app">
+        <div class="wave-container" aria-hidden="true">
+<div class="wave-loading" id="waveLoading">
+                <div class="spinner"></div>
+                <p>Generating waveform...</p>
+            </div>
+            <canvas id="waveCanvas"></canvas>
+        </div>
+        <div class="controls">
+            <div class="control-group">
+                <label for="frequency" id="frequency-label">Frequency (Hz):</label>
+                <input type="range" id="frequency" min="20" max="2000" value="440" role="slider" aria-labelledby="frequency-label" aria-valuemin="20" aria-valuemax="2000" aria-valuenow="440" aria-describedby="frequency-value">
+                <span class="value-display" id="frequency-value">440</span>
+            </div>
+            <div class="control-group">
+                <label for="amplitude" id="amplitude-label">Amplitude:</label>
+                <input type="range" id="amplitude" min="0" max="100" value="50" role="slider" aria-labelledby="amplitude-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-describedby="amplitude-value">
+                <span class="value-display" id="amplitude-value">50</span>
+            </div>
+            <div class="button-group">
+                <button id="generateBtn" aria-label="Generate sound wave">Generate Wave</button>
+                <button id="saveBtn" aria-label="Save current settings to local storage">Save Settings</button>
+                <button id="exportPngBtn" aria-label="Export wave as PNG image">Export as PNG</button>
+                <button id="exportSvgBtn" aria-label="Export wave as SVG image">Export as SVG</button>
+            </div>
+        </div>
+    </div>
+    <script src="preloader.js"></script>
 </body>
 </html>

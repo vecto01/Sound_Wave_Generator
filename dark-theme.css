@@ -1,0 +1,85 @@
+:root {--bg-color: #121212; --text-color: #e0e0e0; --primary-color: #4a90e2; --wave-color: #4a90e0; --button-bg: #1e1e1e; --button-text: #ffffff; --input-bg: #2d2d2d; --input-text: #ffffff; --border-color: #333333;}
+
+body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+
+#wave-container {
+  background-color: var(--bg-color);
+  will-change: transform, opacity;
+  min-height: 300px;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.wave-display { border-color: var(--wave-color); }
+
+button { background-color: var(--button-bg); color: var(--button-text); border-color: var(--button-bg); }
+
+input { background-color: var(--input-bg); color: var(--input-text); border-color: var(--border-color); }
+
+label, h1, h2, h3 { color: var(--text-color); }
+
+.loading-overlay { background-color: rgba(0, 0, 0, 0.7); }
+
+@media (prefers-color-scheme: dark) { body { background-color: var(--bg-color); color: var(--text-color); } }
+
+/* Анимации для темной темы */
+@keyframes pulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+.wave-display {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: transform, opacity;
+}
+
+.loading-spinner {
+  animation: pulse 1.5s infinite ease-in-out;
+  transition: opacity 0.3s ease;
+}
+@keyframes pulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.wave-display {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: transform, opacity;
+}
+
+.wave-display.fade-out {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+button:hover {
+    background-color: #388e3c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.wave-message {
+    color: var(--primary-color);
+    background-color: rgba(74, 160, 226, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    max-width: 300px;
+    text-align: center;
+    font-size: 14px;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

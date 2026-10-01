@@ -1,0 +1,441 @@
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Плавные переходы */
+* {
+    transition: all 0.3s ease;
+}
+
+.preloader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    transition: background-color 0.5s ease;
+}
+
+.preloader {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+    will-change: transform;
+    animation: spinAndFill 1.5s linear infinite;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.preloader::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(#4CAF50 0%, #4CAF50 0%);
+    transform: rotate(0deg);
+    animation: fillCircle 1.5s linear infinite;
+}
+
+@keyframes spinAndFill {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fillCircle {
+    0% { background: conic-gradient(#4CAF50 0%, #4CAF50 0%); }
+    100% { background: conic-gradient(#4CAF50 0%, #4CAF50 100%); }
+}
+
+.progress-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.3);
+    opacity: 0.9;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.progress-bar {
+    width: 80%;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background-color: #4CAF50;
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.progress-bar.completed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.progress-bar.completed::after {
+    background-color: #4CAF50;
+    width: 100%;
+    animation: pulse 1s ease-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.preloader-container.fade-out {
+    opacity: 1;
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+#wave-canvas {
+    width: 100%;
+    height: 300px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(10px, 20px, 30px);
+    width: 100%;
+    padding: clamp(10px, 20px, 30px);
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    z-index: 100;
+    margin-top: clamp(16px, 24px, 40px);
+    backdrop-filter: blur(5px);
+}
+
+.controls-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 15px, 20px);
+    width: 100%;
+    max-width: clamp(200px, 300px, 400px);
+}
+
+.controls-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 15px, 20px);
+    width: 100%;
+    max-width: clamp(150px, 200px, 250px);
+}
+
+button {
+    padding: clamp(8px, 12px, 16px);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #4CAF50;
+    color: #FFFFFF;
+    border: none;
+    border-radius: clamp(2px, 4px, 6px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: clamp(80px, 120px, 160px);
+    height: clamp(36px, 48px, 60px);
+    margin-bottom: clamp(6px, 12px, 20px);
+    will-change: transform;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #22c55e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+    transform: scale(0.98);
+    background-color: #16a34a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #cccccc;
+    color: #333;
+    box-shadow: none;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: clamp(4px, 8px, 12px) 0;
+    height: clamp(4px, 6px, 8px);
+    -webkit-appearance: none;
+    background: #e5e7eb;
+    border-radius: clamp(2px, 3px, 4px);
+    outline: none;
+    transition: background 0.2s ease;
+    min-width: clamp(150px, 200px, 250px);
+    touch-action: pan-y;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 0 2px white;
+    margin-top: -1px;
+    transition: transform 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: #2563eb;
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+    background: #1d4ed8;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 0 2px white;
+    transition: transform 0.1s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    background: #2563eb;
+}
+
+input[type="range"]::-moz-range-thumb:active {
+    transform: scale(1.1);
+    background: #1d4ed8;
+}
+
+input[type="range"]::-ms-thumb {
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 0 2px white;
+    transition: transform 0.1s ease;
+}
+
+input[type="range"]::-ms-thumb:hover {
+    transform: scale(1.2);
+    background: #2563eb;
+}
+
+input[type="range"]::-ms-thumb:active {
+    transform: scale(1.1);
+    background: #1d4ed8;
+}
+
+#frequency-value, #amplitude-value {
+    margin-top: 5px;
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+    white-space: nowrap;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.wave-container {
+    min-height: clamp(150px, 200px, 300px);
+    max-height: clamp(250px, 400px, 500px);
+    width: clamp(200px, 80vw, 600px);
+    margin: clamp(10px, 20px, 30px) auto;
+    overflow: hidden;
+    border-radius: clamp(4px, 8px, 12px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    transition: all 0.3s ease;
+    will-change: transform;
+    transform: translateZ(0);
+    position: relative;
+}
+
+.wave-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    color: #4CAF50;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.spinner {
+    width: clamp(30px, 40px, 50px);
+    height: clamp(30px, 40px, 50px);
+    border: clamp(2px, 4px, 6px) solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #4CAF50;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: clamp(8px, 10px, 15px);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.wave-loading.active {
+    opacity: 1;
+}
+
+.spinner.active {
+    opacity: 1;
+}
+
+.wave-container.success {
+    animation: pulse 2s ease-in-out;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+
+
+
+}
+
+/* Медиа-запросы для адаптивности волны */
+@media (max-width: 1200px) {
+    .wave-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 992px) {
+    .wave-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .wave-container {
+        height: 200px;
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .controls {
+        gap: 16px;
+    }
+    button {
+        padding: 8px 16px;
+        font-size: 14px;
+        height: 36px;
+    }
+    .controls-sliders {
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+    .container {
+        padding: 15px;
+    }
+    #wave-canvas {
+        height: 200px;
+    }
+    button {
+        width: 100%;
+        margin-bottom: 12px;
+        padding: 10px 16px;
+        height: 40px;
+    }
+    .controls-sliders, .controls-buttons {
+        width: 100%;
+    }
+    input[type="range"] {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .controls {
+        padding: 10px 0;
+        margin-top: 16px;
+    }
+    button {
+        padding: 8px 12px;
+        height: 36px;
+        font-size: 14px;
+    }
+    #wave-canvas {
+        height: 150px;
+    }
+    #frequency-value, #amplitude-value {
+        font-size: 14px;
+    }
+}

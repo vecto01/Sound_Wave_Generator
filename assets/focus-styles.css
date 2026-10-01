@@ -1,0 +1,26 @@
+/* Стили для фокусного состояния кнопок и других элементов */
+:focus {
+    outline: none;
+}
+
+button:focus-visible {
+    outline: 2px solid #4CAF50;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+    transform: scale(1.02);
+}
+
+input[type="range"]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+button.loading:focus-visible {
+    outline: 2px solid #4CAF50;
+    outline-offset: 2px;
+}

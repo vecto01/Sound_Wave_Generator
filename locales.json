@@ -1,0 +1,37 @@
+{
+  "en": {
+    "title": "Sound Wave Generator",
+    "frequencyLabel": "Frequency",
+    "amplitudeLabel": "Amplitude",
+    "colorLabel": "Wave Color",
+    "generateButton": "Generate Wave",
+    "saveSettings": "Save Settings",
+    "language": "Language",
+    "spanish": "Español",
+    "english": "English",
+    "russian": "Русский"
+  },
+  "es": {
+    "title": "Generador de Ondas Sonoras",
+    "frequencyLabel": "Frecuencia",
+    "amplitudeLabel": "Amplitud",
+    "colorLabel": "Color de la Onda",
+    "generateButton": "Generar Onda",
+    "saveSettings": "Guardar Configuración",
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "Inglés"
+  },
+  "ru": {
+    "title": "Генератор волн",
+    "frequencyLabel": "Частота",
+    "amplitudeLabel": "Амплитуда",
+    "colorLabel": "Цвет волны",
+    "generateButton": "Сгенерировать волну",
+    "saveSettings": "Сохранить настройки",
+    "language": "Язык",
+    "spanish": "Español",
+    "english": "English",
+    "russian": "Русский"
+  }
+}
