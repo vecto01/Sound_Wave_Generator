@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Wave Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            color: #333;
+            transition: background-color 0.3s;
+            padding: 20px;
+        }
+        body.dark {
+            background-color: #121212;
+            color: #f0f0f0;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        #wave-canvas {
+            width: 100%;
+            height: 300px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            transition: transform 0.3s ease;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+            will-change: transform, opacity;
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        button.dark {
+            background-color: #008000;
+        }
+        button.dark:hover {
+            background-color: #006400;
+        }
+        button.loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .file-upload {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .file-upload:hover {
+            background-color: #d0d0d0;
+        }
+        .error {
+            color: #f44336;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .loading.active {
+            opacity: 1;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(76, 175, 80, 0.2);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        .loading-text {
+            font-size: 16px;
+            color: #4CAF50;
+            margin: 0;
+            animation: pulse 1.5s infinite alternate;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        .wave-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            position: relative;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .wave-container.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .wave-axes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .wave-axes line {
+            stroke: #ccc;
+            stroke-width: 1;
+        }
+        .wave-axes .x-axis {
+            stroke: #ccc;
+        }
+        .wave-axes .y-axis {
+            stroke: #ccc;
+        }
+        .wave-axes .x-grid {
+            stroke: #eee;
+            stroke-dasharray: 5, 5;
+        }
+        .wave-axes .y-grid {
+            stroke: #eee;
+            stroke-dasharray: 5, 5;
+        }
+        @media (max-width: 1024px) {
+            .controls {
+                gap: 12px;
+            }
+            button {
+                padding: 10px 20px;
+            }
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            #wave-canvas {
+                height: 200px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            button {
+                width: 100%;
+                max-width: 250px;
+                margin-bottom: 8px;
+            }
+            .file-upload {
+                width: 100%;
+            }
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #777;
+            opacity: 0.7;
+        }
+        .footer.dark {
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sound Wave Generator</h1>
+        <div class="controls">
+            <button id="generate-btn" class="btn">Generate Wave</button>
+            <button id="clear-btn" class="btn">Clear</button>
+            <div class="file-upload">
+                <label for="file-input">Upload Audio File</label>
+                <input type="file" id="file-input" accept="audio/*">
+            </div>
+        </div>
+        <div id="error-message" class="error" style="display: none;"></div>
+        <div id="loading" class="loading">
+            <div class="wave-container">
+                <div class="spinner"></div>
+                <p class="loading-text">Generating Wave...</p>
+            </div>
+        </div>
+        <div id="wave-container" class="wave-container" style="display: none;">
+            <svg class="wave-axes" width="100%" height="100%">
+                <line class="x-axis" x1="0" y1="150" x2="100%" y2="150" stroke="#ccc" stroke-width="1"/>
+                <line class="y-axis" x1="50%" y1="0" x2="50%" y2="100%" stroke="#ccc" stroke-width="1"/>
+                <line class="x-grid" x1="0" y1="150" x2="100%" y2="150" stroke="#eee" stroke-dasharray="5, 5"/>
+                <line class="y-grid" x1="50%" y1="0" x2="50%" y2="100%" stroke="#eee" stroke-dasharray="5, 5"/>
+            </svg>
+            <canvas id="wave-canvas"></canvas>
+        </div>
+        <footer class="footer">© 2023 Sound Wave Generator</footer>
+    </div>
+    <script>
+        const canvas = document.getElementById('wave-canvas');
+        const ctx = canvas.getContext('2d');
+        const generateBtn = document.getElementById('generate-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const fileInput = document.getElementById('file-input');
+        const errorMessage = document.getElementById('error-message');
+        const loadingDiv = document.getElementById('loading');
+        const waveContainer = document.getElementById('wave-container');
+        
+        // Toggle dark mode
+        document.body.classList.toggle('dark');
+        
+        // Show loading and hide wave when generating
+        generateBtn.addEventListener('click', () => {
+            errorMessage.style.display = 'none';
+            generateBtn.classList.add('loading');
+            loadingDiv.classList.add('active');
+            waveContainer.classList.remove('active');
+            setTimeout(() => {
+                generateWave();
+                generateBtn.classList.remove('loading');
+                loadingDiv.classList.remove('active');
+                waveContainer.classList.add('active');
+            }, 1500);
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('audio/')) {
+                errorMessage.textContent = 'Please upload an audio file.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            console.log('File uploaded:', file.name);
+        });
+        
+        function generateWave() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            // Simple sine wave for demo
+            const centerY = canvas.height / 2;
+            const amplitude = 100;
+            const frequency = 5;
+            
+            ctx.moveTo(0, centerY);
+            for (let x = 0; x <= canvas.width; x++) {
+                const y = centerY + Math.sin(x / frequency) * amplitude;
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.stroke();
+        }
+    </script>
+    </body>
+    </html>
