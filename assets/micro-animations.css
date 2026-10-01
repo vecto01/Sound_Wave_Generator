@@ -1,0 +1,67 @@
+canvas {
+    will-change: transform;
+    transition: transform 0.3s ease;
+}
+
+.wave-container {
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    min-height: 300px;
+}
+
+#waveCanvas {
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+button {
+    transition: all 0.2s ease;
+}
+
+.control-group label {
+    transition: color 0.3s ease;
+}
+
+.value-display {
+    transition: color 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+    button {
+        background-color: rgba(76, 175, 80, 0.9);
+    }
+    button:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    .value-display {
+        color: #fff;
+    }
+}
+
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+    }
+    button {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .control-group {
+        gap: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .control-group label {
+        font-size: 0.8rem;
+    }
+}

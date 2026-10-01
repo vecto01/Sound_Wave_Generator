@@ -2,6 +2,28 @@ class WavePreloader {
     constructor() {
         this.waveLoading = document.getElementById('waveLoading');
         this.isVisible = true;
+        this.settings = {
+            frequency: 1,
+            amplitude: 1,
+            colorScheme: 'light'
+        };
+    }
+
+    saveSettings() {
+        localStorage.setItem('waveSettings', JSON.stringify(this.settings));
+    }
+
+    loadSettings() {
+        const savedSettings = localStorage.getItem('waveSettings');
+        if (savedSettings) {
+            this.settings = JSON.parse(savedSettings);
+        }
+    }
+
+    // Сохранение текущей цветовой схемы
+    saveTheme() {
+        localStorage.setItem('theme', this.settings.colorScheme);
+        document.documentElement.setAttribute('data-theme', this.settings.colorScheme);
     }
 
     show() {

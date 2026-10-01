@@ -6,15 +6,21 @@
     <title id="page-title">Sound Wave Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/micro-animations.css">
     <link rel="stylesheet" href="dark-theme.css">
     <link rel="stylesheet" href="focus-styles.css">
-    <style>
+<style>
         :root {
             --primary-color: #4CAF50;
             --secondary-color: #26A69A;
             --text-color: #333;
+            --text-color-dark: #e0e0e0;
             --light-bg: #f9f9f9;
             --dark-bg: #121212;
+            --spinner-color: white;
+            --spinner-color-dark: var(--primary-color);
+            --preloader-text-color: #666;
+            --preloader-text-color-dark: #fff;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -28,10 +34,143 @@
             align-items: center;
             justify-content: center;
             overflow-x: hidden;
+            padding-bottom: 1rem;
+            transition: all 0.3s ease;
         }
         .wave-container {
-            width: clamp(300px, 80vw, 600px);
-            height: clamp(200px, 10vh, 300px);
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin: 1rem auto;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 1rem;
+        }
+        button, input {
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            text-align: center;
+            transition: all 0.2s ease;
+            padding: 0.6rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        button:hover, button:focus-visible {
+            transform: translateY(-2px);
+            background-color: #45a049;
+        }
+        button:focus-visible {
+            outline: 2px solid #4CAF50;
+            outline-offset: 2px;
+        }
+        .hidden {
+            display: none;
+        }
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(var(--light-bg-r), var(--light-bg-g), var(--light-bg-b), 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        #preloader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #preloader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--spinner-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        #preloader-text {
+            color: var(--preloader-text-color);
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: var(--dark-bg);
+                color: var(--text-color-dark);
+            }
+            .wave-container {
+                background-color: #1a1a1a;
+            }
+            #preloader {
+                background: rgba(var(--dark-bg-r), var(--dark-bg-g), var(--dark-bg-b), 0.9);
+            }
+            #preloader-text {
+                color: var(--preloader-text-color-dark);
+            }
+            #preloader-spinner {
+                border-top-color: var(--spinner-color-dark);
+            }
+            .control-group label {
+                color: var(--text-color-dark);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            touch-action: manipulation;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .value-display {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+
+        .fallback-content {
+            display: none;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .wave-container {
             aspect-ratio: 16/9;
             margin: 1rem auto;
             background-color: white;
@@ -43,95 +182,31 @@
             overflow: hidden;
             position: relative;
         }
-        .fallback-content {
-            display: none;
-            color: #666;
-            font-size: 1rem;
-        }
-        .value-display {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            margin-left: 0.5rem;
-        }
-        .control-group {
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-        }
-        .control-group label {
-            margin-right: 0.5rem;
-            font-size: 0.9rem;
-        }
-        input[type="range"] {
-            width: 100%;
-            touch-action: manipulation;
-            min-width: 200px;
-        }
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        button {
-            padding: 0.6rem 1rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:focus-visible {
-            outline: 2px solid #4CAF50;
-            outline-offset: 2px;
-        }
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: var(--dark-bg);
-                color: #e0e0e0;
-            }
-            .wave-container {
-                background-color: #222;
-            }
-        }
-        .loading-spinner {
-            display: none;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-            will-change: transform;
-        }
-        
-        .wave-container {
-            will-change: transform;
-        }
-        
+
         canvas {
             will-change: transform;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
+
         .loading-message {
             display: none;
             color: #666;
             font-size: 1rem;
             text-align: center;
         }
+
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+            #preloader-spinner {
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="polyfills.js"></script>
-<script>
+    <script>
         // Функция debounce для оптимизации слайдеров
         function debounce(func, delay) {
             let timeoutId;
@@ -203,8 +278,14 @@
         }, 100);
         
         // Настройка событий для слайдеров
-        document.getElementById('frequency').addEventListener('input', updateWave);
-        document.getElementById('amplitude').addEventListener('input', updateWave);
+        document.getElementById('frequency').addEventListener('input', function() {
+            updateWave();
+            wavePreloader.saveSettings();
+        });
+        document.getElementById('amplitude').addEventListener('input', function() {
+            updateWave();
+            wavePreloader.saveSettings();
+        });
         
         // Обработка клавиатуры
         document.addEventListener('keydown', (e) => {
@@ -238,26 +319,89 @@
         
         // Сохранение настроек
         document.getElementById('saveBtn').addEventListener('click', function() {
-            const settings = {
-                frequency: document.getElementById('frequency-slider').value,
-                amplitude: document.getElementById('amplitude-slider').value
-            };
-            localStorage.setItem('waveSettings', JSON.stringify(settings));
+            if (confirm('Сохранить текущие настройки?')) {
+                try {
+                    const frequency = parseInt(document.getElementById('frequency').value);
+                    const amplitude = parseInt(document.getElementById('amplitude').value);
+                    
+                    if (isNaN(frequency) || isNaN(amplitude)) {
+                        alert('Пожалуйста, введите корректные значения для частоты и амплитуды.');
+                        return;
+                    }
+                    
+                    const settings = {
+                        frequency: frequency,
+                        amplitude: amplitude,
+                        colorScheme: document.documentElement.getAttribute('data-theme') || 'light'
+                    };
+                    
+                    localStorage.setItem('waveSettings', JSON.stringify(settings));
+                    wavePreloader.saveSettings();
+                    alert('Настройки успешно сохранены!');
+                } catch (error) {
+                    alert('Ошибка сохранения настроек: ' + error.message);
+                }
+            }
         });
         
         // Загрузка настроек
-        const savedSettings = localStorage.getItem('waveSettings');
-        if (savedSettings) {
-            const settings = JSON.parse(savedSettings);
-            document.getElementById('frequency-slider').value = settings.frequency;
-            document.getElementById('amplitude-slider').value = settings.amplitude;
-            updateDisplayValues();
+        try {
+            const savedSettings = localStorage.getItem('waveSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                const frequency = parseInt(settings.frequency) || 440;
+                const amplitude = parseInt(settings.amplitude) || 50;
+                
+                if (!isNaN(frequency) && !isNaN(amplitude)) {
+                    document.getElementById('frequency').value = frequency;
+                    document.getElementById('amplitude').value = amplitude;
+                    updateDisplayValues();
+                    wavePreloader.settings.frequency = frequency;
+                    wavePreloader.settings.amplitude = amplitude;
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки настроек:', error.message);
+            alert('Ошибка загрузки настроек. Используются стандартные параметры.');
+        }
+        
+        // Загрузка цветовой схемы
+        try {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                wavePreloader.settings.colorScheme = savedTheme;
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки темы:', error.message);
+        }
+        
+        // Обработка переключения тем
+        document.getElementById('themeToggleBtn').addEventListener('click', function() {
+            try {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                wavePreloader.settings.colorScheme = newTheme;
+                wavePreloader.saveTheme();
+                alert('Тема успешно изменена на ' + newTheme);
+            } catch (error) {
+                alert('Ошибка при сохранении темы: ' + error.message);
+            }
+        });
+        
+        // Проверка prefers-color-scheme
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        if (prefersDark.matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            wavePreloader.settings.colorScheme = 'dark';
         }
         
         // Инициализация
         initWaveCanvas();
         updateDisplayValues();
-
+        
         // Функция экспорта в PNG
         document.getElementById('exportPngBtn').addEventListener('click', function() {
             const canvas = document.getElementById('waveCanvas');
@@ -268,7 +412,7 @@
                 link.click();
             });
         });
-
+        
         // Функция экспорта в SVG
         document.getElementById('exportSvgBtn').addEventListener('click', function() {
             const canvas = document.getElementById('waveCanvas');
@@ -276,14 +420,14 @@
             svg.setAttribute('width', canvas.width);
             svg.setAttribute('height', canvas.height);
             svg.setAttribute('viewBox', '0 0 ' + canvas.width + ' ' + canvas.height);
-
+            
             const svgNS = 'http://www.w3.org/2000/svg';
             const image = document.createElementNS(svgNS, 'image');
             image.setAttribute('href', canvas.toDataURL('image/png'));
             image.setAttribute('width', canvas.width);
             image.setAttribute('height', canvas.height);
             svg.appendChild(image);
-
+            
             const link = document.createElement('a');
             link.download = 'wave-' + new Date().toISOString().slice(0, 19).replace('T', '_') + '.svg';
             link.href = URL.createObjectURL(new Blob([svg.outerHTML], { type: 'image/svg+xml' }));
@@ -303,6 +447,9 @@
             <canvas id="waveCanvas"></canvas>
         </div>
         <div class="controls">
+            <div class="button-group">
+                <button id="themeToggleBtn" aria-label="Toggle dark/light theme">Toggle Theme</button>
+            </div>
             <div class="control-group">
                 <label for="frequency" id="frequency-label">Frequency (Hz):</label>
                 <input type="range" id="frequency" min="20" max="2000" value="440" role="slider" aria-labelledby="frequency-label" aria-valuemin="20" aria-valuemax="2000" aria-valuenow="440" aria-describedby="frequency-value">
