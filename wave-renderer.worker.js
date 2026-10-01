@@ -5,7 +5,8 @@ let frequency = 440;
 let amplitude = 50;
 let canvasCtx;
 let animationId;
-let isAnimating = false;
+let isAnimating = true;
+let timeOffset = 0;
 
 // Кэш для предыдущих параметров
 let cachedFrequency = frequency;
@@ -22,7 +23,11 @@ self.onmessage = function(e) {
         cachedFrequency = frequency;
         cachedAmplitude = amplitude;
         cachedPoints = [];
+        timeOffset = 0;
         drawWave();
+        if (isAnimating) {
+            animate();
+        }
     } else if (e.data.type === 'update') {
         frequency = e.data.frequency;
         amplitude = e.data.amplitude;
@@ -30,11 +35,23 @@ self.onmessage = function(e) {
         cachedAmplitude = amplitude;
         cachedPoints = [];
         drawWave();
-    } else if (e.data.type === 'stop') {
+    } else if (e.data.type === 'pause') {
         cancelAnimationFrame(animationId);
         isAnimating = false;
+    } else if (e.data.type === 'play') {
+        isAnimating = true;
+        animate();
     }
 };
+
+// Анимация волны
+function animate() {
+    if (!isAnimating) return;
+    
+    timeOffset += 0.01;
+    drawWave();
+    animationId = requestAnimationFrame(animate);
+}
 
 // Рендеринг волны
 function drawWave() {
@@ -60,8 +77,14 @@ function drawWave() {
     if (cachedPoints.length === 0) {
         for (let i = 0; i <= samples; i++) {
             const x = (i / samples) * width;
-            const y = centerY + Math.sin((i * frequency / 1000) * 2 * Math.PI) * amplitude;
+            const y = centerY + Math.sin((i * frequency / 1000) * 2 * Math.PI + timeOffset) * amplitude;
             cachedPoints.push({ x, y });
+        }
+    } else {
+        for (let i = 0; i <= samples; i++) {
+            const x = (i / samples) * width;
+            const y = centerY + Math.sin((i * frequency / 1000) * 2 * Math.PI + timeOffset) * amplitude;
+            cachedPoints[i] = { x, y };
         }
     }
     
@@ -80,7 +103,4 @@ function drawWave() {
     }
     
     canvasCtx.stroke();
-    
-    // Анимация отключена для статических волн
-    isAnimating = false;
 }

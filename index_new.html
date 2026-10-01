@@ -124,9 +124,47 @@
             <div class="button-group">
                 <button id="generateBtn">Generate Wave</button>
                 <button id="saveBtn">Save Settings</button>
+                <button id="exportSvgBtn">Export as SVG</button>
+                <button id="exportJsonBtn">Export as JSON</button>
             </div>
         </div>
     </div>
+<script>
+        // Экспорт волны в SVG
+        document.getElementById('exportSvgBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('waveCanvas');
+            html2canvas(canvas).then(function(canvas) {
+                const svg = canvas.toDataURL('image/svg+xml');
+                const svgBlob = new Blob([svg], {type: 'image/svg+xml'});
+                const svgUrl = URL.createObjectURL(svgBlob);
+                const a = document.createElement('a');
+                a.href = svgUrl;
+                a.download = 'wave.svg';
+                a.click();
+                URL.revokeObjectURL(svgUrl);
+            });
+        });
+
+        // Экспорт волны в JSON
+        document.getElementById('exportJsonBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('waveCanvas');
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const jsonData = {
+                width: canvas.width,
+                height: canvas.height,
+                data: Array.from(imageData.data),
+                timestamp: new Date().toISOString()
+            };
+            const jsonBlob = new Blob([JSON.stringify(jsonData, null, 2)], {type: 'application/json'});
+            const jsonUrl = URL.createObjectURL(jsonBlob);
+            const a = document.createElement('a');
+            a.href = jsonUrl;
+            a.download = 'wave_data.json';
+            a.click();
+            URL.revokeObjectURL(jsonUrl);
+        });
+    </script>
     <script src="preloader.js"></script>
 </body>
 </html>

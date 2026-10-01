@@ -208,6 +208,8 @@
         // Инициализация Web Worker
         let waveWorker;
         let canvas, ctx;
+        let isAnimating = true;
+        let scrollPosition = 0;
         
         // Фокусируемые элементы
         const focusableElements = [
@@ -248,6 +250,10 @@
             canvas.style.opacity = '0';
             canvas.style.transform = 'scaleY(0)';
             
+            // Добавляем класс для анимации генерации волны
+            document.getElementById('waveCanvas').classList.add('wave-generating');
+            document.getElementById('waveLoadingIndicator').classList.add('active');
+            
             waveWorker = new Worker('wave-renderer.worker.js');
             waveWorker.postMessage({ type: 'init', canvas, ctx });
             
@@ -260,6 +266,10 @@
                     document.getElementById('waveResult').textContent = 'Wave generated successfully!';
                     canvas.style.opacity = '1';
                     canvas.style.transform = 'scaleY(1)';
+                    
+                    // Убираем класс анимации генерации волны
+                    document.getElementById('waveCanvas').classList.remove('wave-generating');
+                    document.getElementById('waveLoadingIndicator').classList.remove('active');
                 }
             };
         }
@@ -283,6 +293,20 @@
         document.getElementById('amplitude').addEventListener('input', function() {
             updateWave();
         });
+
+        // Режим синхронизации с музыкой
+        document.getElementById('audio-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const url = URL.createObjectURL(file);
+                const audioBuffer = audioContext.createBufferSource();
+                audioBuffer.connect(audioContext.destination);
+                audioContext.decodeAudioData(url).then(function(buffer) {
+                    waveWorker.postMessage({ type: 'sync-music', buffer: buffer });
+                });
+            }
+        });
         
         // Обработка клавиатуры
         document.addEventListener('keydown', (e) => {
@@ -296,6 +320,23 @@
             } else if (e.key === 'Escape') {
                 document.getElementById('frequency').focus();
             }
+        });
+        
+        // Обработка скролла для паузы анимации
+        window.addEventListener('scroll', function() {
+            const currentScroll = window.scrollY || window.pageYOffset;
+            if (currentScroll > scrollPosition && isAnimating) {
+                isAnimating = false;
+                if (waveWorker) {
+                    waveWorker.postMessage({ type: 'pause' });
+                }
+            } else if (currentScroll < scrollPosition && !isAnimating) {
+                isAnimating = true;
+                if (waveWorker) {
+                    waveWorker.postMessage({ type: 'play' });
+                }
+            }
+            scrollPosition = currentScroll;
         });
         
         // Обновление отображаемых значений
@@ -407,6 +448,7 @@
     <div class="wave-container">
         <canvas id="waveCanvas" width="600" height="300"></canvas>
         <div id="waveLoading" class="loading-message">Generating waveform...</div>
+        <div id="waveLoadingIndicator" class="wave-loading-indicator"></div>
     </div>
     
     <div id="waveResult" class="wave-result"></div>
