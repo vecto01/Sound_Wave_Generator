@@ -1,11 +1,23 @@
 /* Анимации для волны */
 canvas {
-    will-change: transform;
+    will-change: transform, opacity;
     opacity: 0;
     transform: scaleY(0);
     transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
     transform-origin: top center;
+    animation: waveAppear 0.5s forwards;
+}
+
+@keyframes waveAppear {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
 }
 
 .wave-container {
@@ -34,14 +46,14 @@ canvas {
     height: 100%;
     width: 100%;
     color: var(--primary-color);
-    animation: pulse 1.5s infinite ease-in-out;
     text-align: center;
+    animation: loadingPulse 1.5s infinite ease-in-out;
 }
 
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+@keyframes loadingPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 #waveContainerText {

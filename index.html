@@ -54,6 +54,12 @@
             padding-bottom: 1rem;
             transition: all 0.3s ease;
         }
+
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
         
         .wave-container {
             width: 100%;
@@ -351,12 +357,18 @@
         
         // Генерация волны
         document.getElementById('generateBtn').addEventListener('click', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.classList.add('active-feedback');
+            setTimeout(() => generateBtn.classList.remove('active-feedback'), 1000);
             initWaveCanvas();
             updateDisplayValues();
         });
         
         // Сохранение настроек
         document.getElementById('saveBtn').addEventListener('click', function() {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.classList.add('active-feedback');
+            setTimeout(() => saveBtn.classList.remove('active-feedback'), 1000);
             if (confirm('Сохранить текущие настройки?')) {
                 try {
                     const frequency = parseInt(document.getElementById('frequency').value);
@@ -431,34 +443,34 @@
         <div id="preloader-message"></div>
     </div>
     
-    <div class="control-group">
+    <div class="control-group fade-in-delay-0">
         <label>Frequency (Hz)</label>
-        <input type="range" id="frequency" min="20" max="2000" value="440" aria-valuemin="20" aria-valuemax="2000">
-        <span class="value-display" id="frequency-value">440</span>
+        <input type="range" id="frequency" min="20" max="2000" value="440" aria-valuemin="20" aria-valuemax="2000" class="fade-in-delay-0-2s">
+        <span class="value-display fade-in-delay-0-2s" id="frequency-value">440</span>
     </div>
     
-    <div class="control-group">
+    <div class="control-group fade-in-delay-0">
         <label>Amplitude</label>
-        <input type="range" id="amplitude" min="10" max="100" value="50" aria-valuemin="10" aria-valuemax="100">
-        <span class="value-display" id="amplitude-value">50</span>
+        <input type="range" id="amplitude" min="10" max="100" value="50" aria-valuemin="10" aria-valuemax="100" class="fade-in-delay-0-2s">
+        <span class="value-display fade-in-delay-0-2s" id="amplitude-value">50</span>
     </div>
     
-    <button id="generateBtn">Generate Wave</button>
+    <button id="generateBtn" class="fade-in-delay-0-4s">Generate Wave</button>
     
-    <div class="wave-container">
-        <canvas id="waveCanvas" width="600" height="300"></canvas>
-        <div id="waveLoading" class="loading-message">Generating waveform...</div>
-        <div id="waveLoadingIndicator" class="wave-loading-indicator"></div>
+    <div class="wave-container fade-in-delay-0">
+        <canvas id="waveCanvas" width="600" height="300" class="fade-in-delay-0"></canvas>
+        <div id="waveLoading" class="loading-message fade-in-delay-0-4s">Generating waveform...</div>
+        <div id="waveLoadingIndicator" class="wave-loading-indicator fade-in-delay-0-4s"></div>
     </div>
     
-    <div id="waveResult" class="wave-result"></div>
+    <div id="waveResult" class="wave-result fade-in-delay-0-4s"></div>
     
-    <div class="button-group">
-        <button id="saveBtn">Save Settings</button>
-        <button id="exportPngBtn">Export as PNG</button>
-        <button id="exportSvgBtn">Export as SVG</button>
+    <div class="button-group fade-in-delay-0">
+        <button id="saveBtn" class="fade-in-delay-0-4s">Save Settings</button>
+        <button id="exportPngBtn" class="fade-in-delay-0-4s">Export as PNG</button>
+        <button id="exportSvgBtn" class="fade-in-delay-0-4s">Export as SVG</button>
     </div>
     
-    <button id="themeToggleBtn">Toggle Theme</button>
+    <button id="themeToggleBtn" class="fade-in-delay-0-4s">Toggle Theme</button>
 </body>
 </html>

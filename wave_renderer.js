@@ -160,6 +160,7 @@ const WaveRenderer = (() => {
             oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
         }
         saveSettings();
+        triggerWaveTransition();
     }
     
     function setAmplitude(newAmplitude) {
@@ -168,7 +169,24 @@ const WaveRenderer = (() => {
             gainNode.gain.value = amplitude;
         }
         saveSettings();
+        triggerWaveTransition();
     }
+    
+    function triggerWaveTransition() {
+        const canvas = document.getElementById('wave-canvas');
+        if (canvas) {
+            canvas.classList.add('wave-transition');
+            setTimeout(() => {
+                canvas.classList.remove('wave-transition');
+                canvas.classList.add('wave-transition', 'active');
+                setTimeout(() => {
+                    canvas.classList.remove('wave-transition', 'active');
+                }, 500);
+            }, 100);
+        }
+    }
+    
+    // Save settings to localStorage
     
     // Save settings to localStorage
     function saveSettings() {

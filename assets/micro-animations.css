@@ -1,6 +1,47 @@
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInWithDelay {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-delay-0 {
+  animation: fadeInWithDelay 0.5s ease-out forwards 0s;
+}
+
+.fade-in-delay-0-2s {
+  animation: fadeInWithDelay 0.5s ease-out forwards 0.2s;
+}
+
+.fade-in-delay-0-4s {
+  animation: fadeInWithDelay 0.5s ease-out forwards 0.4s;
+}
+
+@keyframes wavePulse {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.05); }
+}
+
 canvas {
     will-change: transform;
     transition: transform 0.3s ease;
+}
+
+.loaded-element {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.wave-container {
+    animation: wavePulse 2s infinite ease-in-out;
 }
 
 .wave-container {
@@ -21,10 +62,77 @@ canvas {
 button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: var(--primary-color);
+    color: white;
+    transition: all 0.2s ease;
 }
 
-button {
-    transition: all 0.2s ease;
+button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: var(--secondary-color);
+    transition: all 0.1s ease;
+}
+
+button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+}
+
+.wave-result.active {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+button.active-feedback {
+    animation: colorPulse 1.5s infinite alternate;
+}
+
+@keyframes colorPulse {
+    from { background-color: var(--primary-color); }
+    to { background-color: var(--secondary-color); }
+}
+
+@keyframes fadeInWithDelay {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-delay-0 {
+  animation: fadeInWithDelay 0.5s ease-out forwards 0s;
+}
+
+.fade-in-delay-0-2s {
+  animation: fadeInWithDelay 0.5s ease-out forwards 0.2s;
+}
+
+.fade-in-delay-0-4s {
+  animation: fadeInWithDelay 0.5s ease-out forwards 0.4s;
+}
+
+.slider-container {
+  transition: all 0.3s ease;
+}
+
+.slider-container:hover .slider-track {
+  background-color: var(--primary-color);
+}
+
+.slider-container:hover .slider-thumb {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3);
 }
 
 .control-group label {
@@ -33,6 +141,17 @@ button {
 
 .value-display {
     transition: color 0.3s ease;
+}
+
+.slider-container:hover .slider-track {
+    background-color: var(--primary-color);
+    transition: background-color 0.3s ease;
+}
+
+.slider-container:hover .slider-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3);
+    transition: all 0.2s ease;
 }
 
 @media (prefers-color-scheme: dark) {
