@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sound Wave Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="assets/preloader.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,19 +55,23 @@
             width: 100%;
         }
         button {
-            padding: 12px 24px;
+            padding: 12px 20px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             background-color: #4CAF50;
             color: white;
             font-weight: bold;
+            font-size: 14px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             opacity: 1;
             will-change: transform, opacity;
-            position: relative;
-            overflow: hidden;
+            margin: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         button:hover {
             background-color: #45a049;
@@ -75,17 +80,26 @@
         }
         button:active {
             transform: scale(0.98);
+            animation: press 0.1s ease-out;
         }
+
+        @keyframes press {
+            0% { transform: scale(1); }
+            100% { transform: scale(0.98); }
+        }
+
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
         button.dark {
-            background-color: #008000;
+            background-color: #2ecc71;
+            color: #fff;
         }
         button.dark:hover {
-            background-color: #006400;
+            background-color: #27ae60;
         }
+
         button.loading::after {
             content: "";
             position: absolute;
@@ -94,43 +108,139 @@
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.3);
-            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+            animation: pulse 1.5s infinite;
         }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
-        input[type="file"] {
-            display: none;
+
+        button.loading {
+            cursor: wait;
+            opacity: 0.8;
         }
-        .file-upload {
-            background-color: #e0e0e0;
+
+        .controls-sliders {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0;
+            width: 80%;
+        }
+        .controls-sliders label {
+            margin-bottom: 5px;
+            font-weight: bold;
             color: #333;
-            padding: 12px;
+        }
+        #frequency-value, #amplitude-value {
+            margin-top: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .slider {
+            width: 100%;
+            margin: 5px 0;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .slider::-ms-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-upload {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            padding: 12px 24px;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-block;
-            margin-bottom: 15px;
-            width: 100%;
-            max-width: 300px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .file-upload:hover {
-            background-color: #d0d0d0;
+            background-color: #45a049;
         }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .file-upload-text {
+            margin-right: 8px;
+            color: white;
+        }
+
+        .file-upload-icon {
+            width: 1.2em;
+            height: 1.2em;
+            fill: white;
+        }
+
         .error {
             color: #f44336;
             margin-top: 10px;
             font-weight: bold;
         }
+
+        .footer {
+            margin-top: 20px;
+            padding: 10px 0;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: #666;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
         .loading {
-            display: none;
-            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
+            background-color: rgba(255, 255, 255, 0.9);
         }
         .loading.active {
             opacity: 1;
@@ -142,7 +252,7 @@
             border-radius: 50%;
             border-top-color: #4CAF50;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin-bottom: 15px;
         }
         .loading-text {
             font-size: 16px;
@@ -150,12 +260,257 @@
             margin: 0;
             animation: pulse 1.5s infinite alternate;
         }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
+        .save-message {
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            margin: 10px auto;
+            width: 200px;
+            text-align: center;
+            font-size: 14px;
+            animation: fadeInOut 2s;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Анимация для ползунков */
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #4CAF50;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+        .slider::-webkit-slider-thumb:hover {
+            background: #2E7D32;
+            transform: scale(1.1);
+        }
+
+        /* Анимация для кнопок */
+        button {
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Адаптивные отступы */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .file-upload {
+                width: 100%;
+            }
+        }
+
+        /* Улучшение контрастности */
+        h1 {
+            color: #2C3E50;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Контрастность текста */
+        .controls-sliders label,
+        #frequency-value,
+        #amplitude-value {
+            color: #2C3E50;
+            font-weight: 500;
+        }
+
+        /* Анимации для кнопок */
+        button {
+            transition: all 0.2s ease;
+            border-radius: 4px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Анимации для ползунков */
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #4CAF50;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+        .slider::-webkit-slider-thumb:hover {
+            background: #2E7D32;
+            transform: scale(1.1);
+        }
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #4CAF50;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .slider::-moz-range-thumb:hover {
+            background: #2E7D32;
+            transform: scale(1.1);
+        }
+
+        /* Адаптивные отступы и размеры */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            button {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            .file-upload {
+                width: 100%;
+            }
+            #frequency-value, #amplitude-value {
+                font-size: 14px;
+            }
+        }
+
+        /* Новые стили для улучшения интерфейса */
+        h1 {
+            color: #000000;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        /* Контрастность текста */
+        .controls-sliders label,
+        #frequency-value,
+        #amplitude-value {
+            color: #2C3E50;
+            font-weight: 500;
+        }
+
+        /* Слайдеры с метками */
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #1976D2;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+        .slider::-webkit-slider-thumb:hover {
+            background: #0D47A1;
+            transform: scale(1.1);
+        }
+
+        /* Метки для слайдеров */
+        .slider::-webkit-slider-runnable-track {
+            height: 4px;
+            background: #E0E0E0;
+            border-radius: 2px;
+        }
+        .slider::-moz-range-track {
+            height: 4px;
+            background: #E0E0E0;
+            border-radius: 2px;
+        }
+
+        /* Анимации для кнопок */
+        button {
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            font-weight: 500;
+            padding: 12px 20px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Кнопка Play */
+        #play-sound-btn {
+            background: #1976D2;
+            color: white;
+            border: none;
+            width: auto;
+        }
+        #play-sound-btn:hover {
+            background: #0D47A1;
+        }
+
+        /* Поле загрузки файла */
+        .file-upload {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            transition: all 0.2s ease;
+        }
+        .file-upload:hover {
+            border-color: #1976D2;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Футер */
+        .footer {
+            margin-top: 20px;
+            padding: 10px 0;
+            text-align: center;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            button {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            .file-upload {
+                width: 100%;
+            }
+            #frequency-value, #amplitude-value {
+                font-size: 14px;
+            }
         }
         .wave-container {
             display: flex;
@@ -165,38 +520,45 @@
             height: 300px;
             position: relative;
             transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
+            animation: fadeIn 0.5s ease-out forwards;
         }
-        .wave-container.active {
-            opacity: 1;
-            transform: translateY(0);
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
+
         .wave-axes {
             position: absolute;
             width: 100%;
             height: 100%;
             pointer-events: none;
         }
+
         .wave-axes line {
             stroke: #ccc;
             stroke-width: 1;
         }
+
         .wave-axes .x-axis {
             stroke: #ccc;
         }
+
         .wave-axes .y-axis {
             stroke: #ccc;
         }
+
         .wave-axes .x-grid {
             stroke: #eee;
             stroke-dasharray: 5, 5;
         }
+
         .wave-axes .y-grid {
             stroke: #eee;
             stroke-dasharray: 5, 5;
         }
-        @media (max-width: 1024px) {
+
+        @media (max-width: 1200px) {
             .controls {
                 gap: 12px;
             }
@@ -204,6 +566,7 @@
                 padding: 10px 20px;
             }
         }
+
         @media (max-width: 600px) {
             .container {
                 padding: 10px;
@@ -226,35 +589,63 @@
             .file-upload {
                 width: 100%;
             }
-        }
-        .footer {
-            margin-top: 40px;
-            font-size: 12px;
-            color: #777;
-            opacity: 0.7;
-        }
-        .footer.dark {
-            color: #aaa;
+            .controls-sliders {
+                width: 100%;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+    <script src="audio.js"></script>
 <body>
+<div class="preloader active" id="preloader"></div>
     <div class="container">
         <h1>Sound Wave Generator</h1>
         <div class="controls">
             <button id="generate-btn" class="btn">Generate Wave</button>
+            <button id="save-preset-btn" class="btn">Save Preset</button>
+            <button id="load-preset-btn" class="btn">Load Preset</button>
+            <button id="random-wave-btn" class="btn">Random Wave</button>
+            <div class="controls-sliders">
+                <label for="frequency-slider">Frequency:</label>
+                <input type="range" id="frequency-slider" min="1" max="20" value="5" class="slider">
+                <span id="frequency-value">5</span>
+            </div>
+            <div class="controls-sliders">
+                <label for="amplitude-slider">Amplitude:</label>
+                <input type="range" id="amplitude-slider" min="10" max="150" value="100" class="slider">
+                <span id="amplitude-value">100</span>
+            </div>
             <button id="clear-btn" class="btn">Clear</button>
+            <button id="play-sound-btn" class="btn">Play Sound</button>
+            <button id="stop-sound-btn" class="btn" disabled>Stop Sound</button>
             <div class="file-upload">
-                <label for="file-input">Upload Audio File</label>
-                <input type="file" id="file-input" accept="audio/*">
+                <label for="file-input" class="file-upload-label">
+                    <span class="file-upload-text">Upload Audio File</span>
+                    <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </label>
+                <input type="file" id="file-input" accept="audio/*" class="file-upload-input">
             </div>
         </div>
         <div id="error-message" class="error" style="display: none;"></div>
+        <div id="save-message" class="save-message" style="display: none;">Settings saved!</div>
         <div id="loading" class="loading">
             <div class="wave-container">
                 <div class="spinner"></div>
-                <p class="loading-text">Generating Wave...</p>
+                <p class="loading-text">Generating wave...</p>
             </div>
+        </div>
+        <div id="wave-container" class="wave-container" style="display: none;"></div>
+        <footer class="footer">
+            <div class="footer-content">
+                <p>© 2023 Sound Wave Generator</p>
+            </div>
+        </footer>
         </div>
         <div id="wave-container" class="wave-container" style="display: none;">
             <svg class="wave-axes" width="100%" height="100%">
@@ -276,58 +667,112 @@
         const errorMessage = document.getElementById('error-message');
         const loadingDiv = document.getElementById('loading');
         const waveContainer = document.getElementById('wave-container');
-        
-        // Toggle dark mode
-        document.body.classList.toggle('dark');
-        
-        // Show loading and hide wave when generating
-        generateBtn.addEventListener('click', () => {
-            errorMessage.style.display = 'none';
-            generateBtn.classList.add('loading');
-            loadingDiv.classList.add('active');
-            waveContainer.classList.remove('active');
+
+let frequency = parseInt(localStorage.getItem('frequency')) || 5;
+        let amplitude = parseInt(localStorage.getItem('amplitude')) || 100;
+
+        document.getElementById('frequency-slider').value = frequency;
+        document.getElementById('frequency-value').textContent = frequency;
+        document.getElementById('amplitude-slider').value = amplitude;
+        document.getElementById('amplitude-value').textContent = amplitude;
+
+        // Сохранение настроек при изменении слайдеров
+        document.getElementById('frequency-slider').addEventListener('input', function() {
+            frequency = parseInt(this.value);
+            document.getElementById('frequency-value').textContent = frequency;
+            saveSettings();
+
+        function saveSettings() {
+            localStorage.setItem('frequency', frequency);
+            localStorage.setItem('amplitude', amplitude);
+            const saveMessage = document.getElementById('save-message');
+            saveMessage.style.display = 'block';
             setTimeout(() => {
-                generateWave();
-                generateBtn.classList.remove('loading');
-                loadingDiv.classList.remove('active');
-                waveContainer.classList.add('active');
-            }, 1500);
+                saveMessage.style.display = 'none';
+            }, 2000);
+        }
         });
-        
-        clearBtn.addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        document.getElementById('amplitude-slider').addEventListener('input', function() {
+            amplitude = parseInt(this.value);
+            document.getElementById('amplitude-value').textContent = amplitude;
+            saveSettings();
         });
-        
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (!file.type.startsWith('audio/')) {
-                errorMessage.textContent = 'Please upload an audio file.';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            console.log('File uploaded:', file.name);
-        });
-        
-        function generateWave() {
+        function saveSettings() {
+            localStorage.setItem('frequency', frequency);
+            localStorage.setItem('amplitude', amplitude);
+        }
+
+        let animationFrameId = null;
+
+        function drawWave() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.strokeStyle = '#4CAF50';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
-            // Simple sine wave for demo
+
             const centerY = canvas.height / 2;
-            const amplitude = 100;
-            const frequency = 5;
-            
             ctx.moveTo(0, centerY);
-            for (let x = 0; x <= canvas.width; x++) {
-                const y = centerY + Math.sin(x / frequency) * amplitude;
+
+            const step = window.devicePixelRatio > 1 ? 2 : 1;
+            for (let x = 0; x <= canvas.width; x += step) {
+                const y = centerY + Math.sin(x / frequency * 0.05) * amplitude * 0.01;
                 ctx.lineTo(x, y);
             }
-            
+
             ctx.stroke();
+            animationFrameId = requestAnimationFrame(drawWave);
         }
+
+        function startAnimation() {
+            drawWave();
+        }
+
+        function stopAnimation() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        generateBtn.addEventListener('click', function() {
+            frequency = parseInt(document.getElementById('frequency-slider').value);
+            amplitude = parseInt(document.getElementById('amplitude-slider').value);
+            saveSettings();
+
+            loadingDiv.classList.add('active');
+            waveContainer.style.display = 'none';
+            setTimeout(() => {
+                loadingDiv.classList.remove('active');
+                waveContainer.style.display = 'block';
+                startAnimation();
+            }, 1000);
+        });
+
+        clearBtn.addEventListener('click', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stopAnimation();
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext.decodeAudioData(event.target.result).then(function(buffer) {
+                    // Handle audio buffer here
+                }).catch(function(error) {
+                    console.error('Error decoding audio data', error);
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize wave container
+            waveContainer.style.display = 'none';
+        });
     </script>
-    </body>
-    </html>
+</body>
+</html>
