@@ -2,475 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title id="page-title">Sound Wave Generator</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="stylesheet" href="css/preloader.css">
-<link rel="stylesheet" href="assets/styles.css">
-<link rel="stylesheet" href="assets/micro-animations.css">
-<link rel="stylesheet" href="assets/wave-animations.css">
-<link rel="stylesheet" href="dark-theme.css">
-<link rel="stylesheet" href="focus-styles.css">
-    <style>
-        .wave-result {
-            display: none;
-            text-align: center;
-            margin-top: 1rem;
-            color: var(--primary-color);
-            font-size: 1.1rem;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .wave-result {
-                color: var(--text-color-dark);
-            }
-        }
-        
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #26A69A;
-            --text-color: #333;
-            --text-color-dark: #e0e0e0;
-            --light-bg: #f9f9f9;
-            --dark-bg: #121212;
-            --spinner-color: white;
-            --spinner-color-dark: var(--primary-color);
-            --preloader-text-color: #666;
-            --preloader-text-color-dark: #fff;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-            padding-bottom: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        body {
-            opacity: 0;
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        
-        
-        .wave-container {
-            width: 100%;
-            max-width: 600px;
-            height: 300px;
-            margin: 1rem auto;
-            position: relative;
-            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 1rem;
-        }
-        
-        button, input {
-            padding: 0.5rem;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        
-        button {
-            width: 100%;
-            text-align: center;
-            transition: all 0.2s ease;
-            padding: 0.6rem 1rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        button:hover, button:focus-visible {
-            transform: translateY(-2px);
-            background-color: #45a049;
-        }
-        
-        button:focus-visible {
-            outline: 2px solid #4CAF50;
-            outline-offset: 2px;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        #preloader {
-            display: none;
-        }
-        
-        .wave-container {
-            aspect-ratio: 16/9;
-            margin: 1rem auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        canvas {
-            will-change: transform;
-            background: linear-gradient(to right, #4CAF50, #26A69A);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        
-        .wave-container {
-            aspect-ratio: 16/9;
-            margin: 1rem auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        #waveLoading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--primary-color);
-        }
-        
-        .wave-result {
-            display: none;
-            text-align: center;
-            margin-top: 1rem;
-            color: var(--primary-color);
-            font-size: 1.1rem;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        #preloader-message {
-            font-size: 1.2rem;
-            margin-top: 1rem;
-        }
-        
-        @media (max-width: 768px) {
-            .button-group {
-                flex-direction: column;
-            }
-            #preloader-spinner {
-                width: 40px;
-                height: 40px;
-            }
-        }
-    </style>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="polyfills.js"></script>
-    <script>
-        // Функция debounce для оптимизации слайдеров
-        function debounce(func, delay) {
-            let timeoutId;
-            return function() {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(func, delay);
-            };
-        }
-        
-        // Загрузка локализации
-        const locales = JSON.parse(document.getElementById('locales').textContent);
-        let currentLanguage = localStorage.getItem('language') || 'en';
-        document.documentElement.lang = currentLanguage;
-        
-        // Проверка prefers-reduced-motion
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) {
-            document.body.classList.add('reduced-motion');
-        }
-        
-        // Инициализация Web Worker
-        let waveWorker;
-        let canvas, ctx;
-        let isAnimating = true;
-        let scrollPosition = 0;
-        
-        // Фокусируемые элементы
-        const focusableElements = [
-            document.getElementById('frequency'),
-            document.getElementById('amplitude'),
-            document.getElementById('generateBtn'),
-            document.getElementById('saveBtn'),
-            document.getElementById('exportPngBtn'),
-            document.getElementById('exportSvgBtn')
-        ];
-        
-        // Навигация по клавиатуре
-        let currentFocusIndex = 0;
-        function focusNextElement() {
-            currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
-            focusableElements[currentFocusIndex].focus();
-        }
-        
-        function focusPrevElement() {
-            currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
-            focusableElements[currentFocusIndex].focus();
-        }
-        
-        function initWaveCanvas() {
-            canvas = document.getElementById('waveCanvas');
-            ctx = canvas.getContext('2d');
-            document.getElementById('waveLoading').classList.add('active');
-            const waveLoadingDiv = document.getElementById('waveLoading');
-            if (!waveLoadingDiv.querySelector('#waveContainerText')) {
-                const textDiv = document.createElement('div');
-                textDiv.id = 'waveContainerText';
-                textDiv.textContent = 'Generating waveform will appear here';
-                waveLoadingDiv.appendChild(textDiv);
-            }
-            document.getElementById('waveLoading').classList.add('active');
-            document.getElementById('preloader').classList.remove('hidden');
-            document.getElementById('preloader-message').textContent = 'Generating waveform...';
-            canvas.style.opacity = '0';
-            canvas.style.transform = 'scaleY(0)';
-            
-            // Добавляем класс для анимации генерации волны
-            document.getElementById('waveCanvas').classList.add('wave-generating');
-            document.getElementById('waveLoadingIndicator').classList.add('active');
-            
-            waveWorker = new Worker('wave-renderer.worker.js');
-            waveWorker.postMessage({ type: 'init', canvas, ctx });
-            
-            waveWorker.onmessage = function(e) {
-                if (e.data.type === 'complete') {
-                    document.getElementById('waveLoading').classList.remove('active');
-                    document.getElementById('preloader').classList.add('hidden');
-                    document.getElementById('waveResult').classList.remove('hidden');
-                    document.getElementById('waveResult').classList.add('visible');
-                    document.getElementById('waveResult').textContent = 'Wave generated successfully!';
-                    canvas.style.opacity = '1';
-                    canvas.style.transform = 'scaleY(1)';
-                    
-                    // Убираем класс анимации генерации волны
-                    document.getElementById('waveCanvas').classList.remove('wave-generating');
-                    document.getElementById('waveLoadingIndicator').classList.remove('active');
-                }
-            };
-        }
-        
-        // Обработка изменения слайдеров с debounce
-        const updateWave = debounce(function() {
-            const frequency = document.getElementById('frequency').value;
-            const amplitude = document.getElementById('amplitude').value;
-            document.getElementById('frequency').setAttribute('aria-valuenow', frequency);
-            document.getElementById('amplitude').setAttribute('aria-valuenow', amplitude);
-            document.getElementById('frequency-value').textContent = frequency;
-            document.getElementById('amplitude-value').textContent = amplitude;
-            waveWorker.postMessage({ type: 'update', frequency, amplitude });
-        }, 100);
-        
-        // Настройка событий для слайдеров
-        document.getElementById('frequency').addEventListener('input', function() {
-            updateWave();
-        });
-        
-        document.getElementById('amplitude').addEventListener('input', function() {
-            updateWave();
-        });
-
-        // Режим синхронизации с музыкой
-        document.getElementById('audio-file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const url = URL.createObjectURL(file);
-                const audioBuffer = audioContext.createBufferSource();
-                audioBuffer.connect(audioContext.destination);
-                audioContext.decodeAudioData(url).then(function(buffer) {
-                    waveWorker.postMessage({ type: 'sync-music', buffer: buffer });
-                });
-            }
-        });
-        
-        // Обработка клавиатуры
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                if (e.shiftKey) {
-                    focusPrevElement();
-                } else {
-                    focusNextElement();
-                }
-            } else if (e.key === 'Escape') {
-                document.getElementById('frequency').focus();
-            }
-        });
-        
-        // Обработка скролла для паузы анимации
-        window.addEventListener('scroll', function() {
-            const currentScroll = window.scrollY || window.pageYOffset;
-            if (currentScroll > scrollPosition && isAnimating) {
-                isAnimating = false;
-                if (waveWorker) {
-                    waveWorker.postMessage({ type: 'pause' });
-                }
-            } else if (currentScroll < scrollPosition && !isAnimating) {
-                isAnimating = true;
-                if (waveWorker) {
-                    waveWorker.postMessage({ type: 'play' });
-                }
-            }
-            scrollPosition = currentScroll;
-        });
-        
-        // Обновление отображаемых значений
-        function updateDisplayValues() {
-            const frequency = document.getElementById('frequency');
-            const amplitude = document.getElementById('amplitude');
-            frequency.setAttribute('aria-valuenow', frequency.value);
-            amplitude.setAttribute('aria-valuenow', amplitude.value);
-            document.getElementById('frequency-value').textContent = frequency.value;
-            document.getElementById('amplitude-value').textContent = amplitude.value;
-        }
-        
-        // Генерация волны
-        document.getElementById('generateBtn').addEventListener('click', function() {
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.classList.add('active-feedback');
-            setTimeout(() => generateBtn.classList.remove('active-feedback'), 1000);
-            initWaveCanvas();
-            updateDisplayValues();
-        });
-        
-        // Сохранение настроек
-        document.getElementById('saveBtn').addEventListener('click', function() {
-            const saveBtn = document.getElementById('saveBtn');
-            saveBtn.classList.add('active-feedback');
-            setTimeout(() => saveBtn.classList.remove('active-feedback'), 1000);
-            if (confirm('Сохранить текущие настройки?')) {
-                try {
-                    const frequency = parseInt(document.getElementById('frequency').value);
-                    const amplitude = parseInt(document.getElementById('amplitude').value);
-                    
-                    if (isNaN(frequency) || isNaN(amplitude)) {
-                        alert('Пожалуйста, введите корректные значения для частоты и амплитуды.');
-                        return;
-                    }
-                    
-                    const settings = {
-                        frequency: frequency,
-                        amplitude: amplitude,
-                        colorScheme: document.documentElement.getAttribute('data-theme') || 'light'
-                    };
-                    
-                    localStorage.setItem('waveSettings', JSON.stringify(settings));
-                    alert('Настройки успешно сохранены!');
-                } catch (error) {
-                    alert('Ошибка сохранения настроек: ' + error.message);
-                }
-            }
-        });
-        
-        // Загрузка настроек
-        try {
-            const savedSettings = localStorage.getItem('waveSettings');
-            if (savedSettings) {
-                const settings = JSON.parse(savedSettings);
-                const frequency = parseInt(settings.frequency) || 440;
-                const amplitude = parseInt(settings.amplitude) || 50;
-                
-                if (!isNaN(frequency) && !isNaN(amplitude)) {
-                    document.getElementById('frequency').value = frequency;
-                    document.getElementById('amplitude').value = amplitude;
-                    updateDisplayValues();
-                }
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки настроек:', error.message);
-            alert('Ошибка загрузки настроек. Используются стандартные параметры.');
-        }
-        
-        // Загрузка цветовой схемы
-        try {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки темы:', error.message);
-        }
-        
-        // Обработка переключения тем
-        document.getElementById('themeToggleBtn').addEventListener('click', function() {
-            try {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                alert('Тема успешно изменена на ' + newTheme);
-            } catch (error) {
-                alert('Ошибка при сохранении темы: ' + error.message);
-            }
-        });
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Wave Generator</title>
+    <!-- Sound Effects -->
+    <audio id="clickSound" src="assets/audio/click.wav" preload="auto"></audio>
+    <audio id="loadingSound" src="assets/audio/loading.wav" preload="auto"></audio>
+    <audio id="errorSound" src="assets/audio/error.wav" preload="auto"></audio>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="preloader" class="hidden">
-        <div id="preloader-spinner"></div>
-        <div id="preloader-text">Loading...</div>
-        <div id="preloader-message"></div>
+    <div class="loading-overlay" id="loadingIndicator">
+        <div class="loader">
+            <svg class="circular-loader" viewBox="25 25 50 50">
+                <circle class="circle-bg" cx="50" cy="50" r="20" fill="none" stroke="#fff" stroke-width="5"></circle>
+                <circle class="circle" cx="50" cy="50" r="20" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 50 50)"></circle>
+            </svg>
+            <p class="fade-in">Generating Wave...</p>
+        </div>
     </div>
     
-    <div class="control-group fade-in-delay-0">
-        <label>Frequency (Hz)</label>
-        <input type="range" id="frequency" min="20" max="2000" value="440" aria-valuemin="20" aria-valuemax="2000" class="fade-in-delay-0-2s">
-        <span class="value-display fade-in-delay-0-2s" id="frequency-value">440</span>
+    <div class="progress-indicator" id="progressIndicator" style="display: none;">
+        <div class="progress-bar"></div>
+        <p class="progress-text">Generating...</p>
     </div>
     
-    <div class="control-group fade-in-delay-0">
-        <label>Amplitude</label>
-        <input type="range" id="amplitude" min="10" max="100" value="50" aria-valuemin="10" aria-valuemax="100" class="fade-in-delay-0-2s">
-        <span class="value-display fade-in-delay-0-2s" id="amplitude-value">50</span>
+    <div class="completion-message" id="completionMessage" style="display: none;">
+        <p>Wave generated successfully!</p>
     </div>
     
-    <button id="generateBtn" class="fade-in-delay-0-4s">Generate Wave</button>
-    
-    <div class="wave-container fade-in-delay-0">
-        <canvas id="waveCanvas" width="600" height="300" class="fade-in-delay-0"></canvas>
-        <div id="waveLoading" class="loading-message fade-in-delay-0-4s">Generating waveform...</div>
-        <div id="waveLoadingIndicator" class="wave-loading-indicator fade-in-delay-0-4s"></div>
+    <div class="container">
+        <canvas id="waveCanvas" class="wave-animation" style="display: none;"></canvas>
+        <div class="controls">
+            <button id="generateBtn" class="button-fade-in button-scale">Generate Wave</button>
+            <div class="volume-control">
+                <span class="volume-label">Volume:</span>
+                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
+                <span id="volumeValue" class="volume-value">70%</span>
+            </div>
+            <div id="generatingIndicator" class="generating-indicator" style="display: none;">
+                <div class="indicator-dot"></div>
+            </div>
+            <div class="button-container">
+                <button class="export-btn button-fade-in button-scale" id="exportPng">Export as PNG</button>
+                <button class="export-btn button-fade-in button-scale" id="exportSvg">Export as SVG</button>
+                <button class="theme-btn button-fade-in button-scale" id="toggleTheme">Toggle Theme</button>
+            </div>
+        </div>
     </div>
     
-    <div id="waveResult" class="wave-result fade-in-delay-0-4s"></div>
-    
-    <div class="button-group fade-in-delay-0">
-        <button id="saveBtn" class="fade-in-delay-0-4s">Save Settings</button>
-        <button id="exportPngBtn" class="fade-in-delay-0-4s">Export as PNG</button>
-        <button id="exportSvgBtn" class="fade-in-delay-0-4s">Export as SVG</button>
+    <script src="script.js"></script>
+    <footer class="footer">
+        <p>© 2023 Sound Wave Generator. All rights reserved.</p>
+        <p>Generated waves with <a href="https://github.com/yourusername/Sound_Wave_Generator" target="_blank">GitHub</a>.</p>
+        <p>Interactive tool for visualizing sound waves.</p>
+    </footer>
+    <div class="reduced-motion-notice" id="reducedMotionNotice" style="display: none;">
+        Reduced motion mode is enabled. Wave animations are disabled for better performance.
     </div>
-    
-    <button id="themeToggleBtn" class="fade-in-delay-0-4s">Toggle Theme</button>
-</body>
+    </body>
+    </html>
 </html>

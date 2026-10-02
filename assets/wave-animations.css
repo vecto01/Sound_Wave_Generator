@@ -45,9 +45,10 @@ canvas {
     justify-content: center;
     height: 100%;
     width: 100%;
-    color: var(--primary-color);
+    color: white;
     text-align: center;
     animation: loadingPulse 1.5s infinite ease-in-out;
+    will-change: transform;
 }
 
 @keyframes loadingPulse {
@@ -91,7 +92,7 @@ canvas {
 
 /* Микроанимации для кнопок */
 button {
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transform: translateY(0);
     padding: 0.6rem 1rem;
     margin: 0 0.5rem;
@@ -99,16 +100,22 @@ button {
     max-width: 200px;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    will-change: transform, box-shadow, background-color;
+    color: #B3E5FC;
+    font-weight: 500;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(to bottom, #45a049, #388e3c);
+    backface-visibility: hidden;
 }
 
 button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
     background-color: #45a049;
 }
 
 button:active {
-    transform: translateY(1px);
+    transform: translateY(1px) scale(0.98);
     background-color: #388e3c;
 }
 
@@ -117,6 +124,16 @@ button:disabled {
     cursor: not-allowed;
     transform: scale(0.98);
     opacity: 0.7;
+    pointer-events: none;
+    color: #999;
+}
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button {
+        transition: none !important;
+    }
 }
 
 .button-group {
@@ -131,6 +148,11 @@ button:disabled {
     .button-group {
         flex-direction: row;
         justify-content: center;
+        gap: 1rem;
+    }
+    .buttons-container {
+        padding: 1.5rem;
+        min-height: 200px;
     }
 }
 
@@ -172,3 +194,27 @@ input[type="range"]:hover::-webkit-slider-thumb {
         margin: 1rem auto 2rem;
     }
 }
+
+/* Анимация для индикатора загрузки */
+#waveLoading {
+    color: white;
+    will-change: transform;
+}
+
+@keyframes loadingPulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Анимация текста */
+.generating-text {
+    animation: typeWriter 1.5s steps(20, end);
+}
+
+@keyframes typeWriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* Анимация текста 

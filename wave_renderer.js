@@ -1,6 +1,6 @@
-// ============================================= 
+// =============================================
 // Wave Renderer: Optimized with requestAnimationFrame
-// ============================================= 
+// =============================================
 
 const WaveRenderer = (() => {
     let canvas;
@@ -11,6 +11,7 @@ const WaveRenderer = (() => {
     let animationId;
     let frequency = 440;
     let amplitude = 0.5;
+    let waveColor = '#4CAF50'; // Начальный цвет волны
     let samples = [];
     let sampleCount = 44100; // 1 second of audio at 44.1kHz
     
@@ -19,11 +20,15 @@ const WaveRenderer = (() => {
         canvas = document.getElementById(canvasId);
         ctx = canvas.getContext('2d');
         
-        // Проверка prefers-reduced-motion
+        // Проверка prefers-reduced-motion и отображение уведомления
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReducedMotion) {
             console.log('Режим с минимальными анимациями выбран. Анимация волны отключена.');
             pauseAnimation();
+            const reducedMotionNotice = document.getElementById('reducedMotionNotice');
+            if (reducedMotionNotice) {
+                reducedMotionNotice.style.display = 'block';
+            }
         }
         
         try {
@@ -107,21 +112,27 @@ const WaveRenderer = (() => {
     // Render wave on canvas (оптимизированный рендеринг)
     function renderWave() {
         if (!canvas || !ctx) return;
-        
+
         const width = canvas.width;
         const height = canvas.height;
-        const sampleWidth = width / sampleCount;
-        
+
+        // Оптимизация для мобильных устройств
+        let currentSampleCount = sampleCount;
+        if (window.matchMedia('(max-width: 600px)').matches) {
+            currentSampleCount = Math.max(1000, Math.floor(sampleCount / 2));
+        }
+
         // Clear canvas
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, width, height);
-        
+
         // Draw wave
-        ctx.strokeStyle = '#4CAF50';
+        const sampleWidth = width / currentSampleCount;
+        ctx.strokeStyle = waveColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        
-        for (let i = 0; i < sampleCount; i++) {
+
+        for (let i = 0; i < currentSampleCount; i++) {
             const x = i * sampleWidth;
             const y = height / 2 - samples[i] * height / 2;
             if (i === 0) {
@@ -130,7 +141,7 @@ const WaveRenderer = (() => {
                 ctx.lineTo(x, y);
             }
         }
-        
+
         ctx.stroke();
     }
     
@@ -153,6 +164,21 @@ const WaveRenderer = (() => {
         }
     }
     
+    // Play sound effect when frequency changes
+    function playSoundEffect() {
+        if (!audioContext) return;
+        const clickOscillator = audioContext.createOscillator();
+        const clickGain = audioContext.createGain();
+        clickOscillator.type = 'sine';
+        clickOscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+        clickOscillator.connect(clickGain);
+        clickGain.connect(audioContext.destination);
+        clickGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        clickGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+        clickOscillator.start();
+        clickOscillator.stop(audioContext.currentTime + 0.1);
+    }
+    
     // Set frequency and amplitude
     function setFrequency(newFrequency) {
         frequency = newFrequency;
@@ -161,6 +187,7 @@ const WaveRenderer = (() => {
         }
         saveSettings();
         triggerWaveTransition();
+        playSoundEffect();
     }
     
     function setAmplitude(newAmplitude) {
@@ -169,7 +196,29 @@ const WaveRenderer = (() => {
             gainNode.gain.value = amplitude;
         }
         saveSettings();
+        updateWaveColor();
         triggerWaveTransition();
+        playSoundEffect();
+    }
+    
+    function updateWaveColor() {
+        // Логика изменения цвета волны в зависимости от частоты и громкости
+        if (frequency > 2000) {
+            waveColor = '#2196F3'; // Синий для высоких частот
+        } else if (frequency > 1000) {
+            waveColor = '#4CAF50'; // Зелёный для средних частот
+        } else {
+            waveColor = '#FF5722'; // Оранжевый для низких частот
+        }
+        
+        // Добавляем CSS-класс для плавной анимации изменения цвета
+        const canvas = document.getElementById('wave-canvas');
+        if (canvas) {
+            canvas.classList.add('wave-color-transition');
+            setTimeout(() => {
+                canvas.classList.remove('wave-color-transition');
+            }, 500);
+        }
     }
     
     function triggerWaveTransition() {
@@ -182,11 +231,9 @@ const WaveRenderer = (() => {
                 setTimeout(() => {
                     canvas.classList.remove('wave-transition', 'active');
                 }, 500);
-            }, 100);
+            }, 500);
         }
     }
-    
-    // Save settings to localStorage
     
     // Save settings to localStorage
     function saveSettings() {
@@ -260,7 +307,6 @@ const WaveRenderer = (() => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        document.body.removeChild(a);
     }
     
     // Create a WAV header
@@ -307,7 +353,6 @@ const WaveRenderer = (() => {
         return header;
     }
     
-    // Initialize WaveRenderer
     // Export wave image as PNG
     function exportWaveImage() {
         if (!canvas) {
@@ -329,7 +374,7 @@ const WaveRenderer = (() => {
             URL.revokeObjectURL(url);
         }, 'image/png', 1);
     }
-    
+
     return {
         init,
         startOscillator,
@@ -341,4 +386,5 @@ const WaveRenderer = (() => {
         exportWave,
         exportWaveImage,
     };
-})();
+
+});
