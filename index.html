@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Кросс-браузерный тест -->
+    <script src="test/cross-browser-test.js"></script>
     <div class="loading-overlay" id="loadingIndicator">
         <div class="loader">
             <svg class="circular-loader" viewBox="25 25 50 50">
@@ -47,6 +49,8 @@
                 <button class="export-btn button-fade-in button-scale" id="exportPng">Export as PNG</button>
                 <button class="export-btn button-fade-in button-scale" id="exportSvg">Export as SVG</button>
                 <button class="theme-btn button-fade-in button-scale" id="toggleTheme">Toggle Theme</button>
+                <button class="sound-only-btn button-fade-in button-scale" id="soundOnlyToggle">Toggle Sound Only Mode</button>
+                <span id="soundOnlyLabel" class="sound-only-label">Enable Sound Only Mode</span>
             </div>
         </div>
     </div>

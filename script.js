@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const amplitudeSlider = document.getElementById('amplitudeSlider');
     const frequencyValue = document.getElementById('frequencyValue');
     const amplitudeValue = document.getElementById('amplitudeValue');
+    const soundOnlyToggle = document.getElementById('soundOnlyToggle');
+    const soundOnlyLabel = document.getElementById('soundOnlyLabel');
     
     // Загрузка сохранённых настроек
     const savedSettings = localStorage.getItem('soundWaveSettings');
@@ -19,7 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
         frequency: 440,      // Частота по умолчанию
         amplitude: 0.5,     // Амплитуда по умолчанию
         waveType: 'sine',   // Тип волны по умолчанию
-        isDarkTheme: false  // Темная тема по умолчанию
+        isDarkTheme: false, // Темная тема по умолчанию
+        isSoundOnlyMode: false // Режим "Только звук" по умолчанию
     };
     
     if (savedSettings) {
@@ -35,10 +38,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let frequency = settings.frequency;
     let time = 0;
     let volume = 0.7;
+    let isSoundOnlyMode = settings.isSoundOnlyMode || false;
     
     // Применение начальной темной темы
     if (isDarkTheme) {
         document.body.classList.add('dark-theme');
+
+    // Применение режима "Только звук"
+    if (isSoundOnlyMode) {
+        canvas.style.display = 'none';
+        soundOnlyLabel.textContent = 'Visualization Disabled (Sound Only Mode)';
+    } else {
+        soundOnlyLabel.textContent = 'Enable Sound Only Mode';
+    }
     }
 
     // Звуковые эффекты
@@ -81,7 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
             frequency: frequency,
             amplitude: amplitude,
             waveType: settings.waveType,
-            isDarkTheme: isDarkTheme
+            isDarkTheme: isDarkTheme,
+            isSoundOnlyMode: isSoundOnlyMode
         };
         localStorage.setItem('soundWaveSettings', JSON.stringify(updatedSettings));
     }
@@ -231,8 +244,68 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обновление настроек при переключении тем
     if (isDarkTheme) {
         document.body.classList.add('dark-theme');
+
+    // Обработка переключения режима "Только звук"
+    soundOnlyToggle.addEventListener('click', function() {
+        clickSound.play();
+        soundOnlyToggle.disabled = true;
+        isSoundOnlyMode = !isSoundOnlyMode;
+        
+        if (isSoundOnlyMode) {
+            canvas.style.display = 'none';
+            soundOnlyLabel.textContent = 'Visualization Disabled (Sound Only Mode)';
+        } else {
+            canvas.style.display = '';
+            soundOnlyLabel.textContent = 'Enable Sound Only Mode';
+        }
+        saveSettings();
+        setTimeout(() => {
+            soundOnlyToggle.disabled = false;
+        }, 300);
+    });
     }
 
+    // Обработка горячих клавиш
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.key === 'ArrowUp') {
+            amplitude = Math.min(1, amplitude + 0.05);
+            amplitudeSlider.value = amplitude;
+            updateSettingsDisplay();
+            saveSettings();
+        } else if (event.ctrlKey && event.key === 'ArrowDown') {
+            amplitude = Math.max(0, amplitude - 0.05);
+            amplitudeSlider.value = amplitude;
+            updateSettingsDisplay();
+            saveSettings();
+        } else if (event.key === 'ArrowUp') {
+            frequency = Math.min(1000, frequency + 50);
+            frequencySlider.value = frequency;
+            updateSettingsDisplay();
+            saveSettings();
+        } else if (event.key === 'ArrowDown') {
+            frequency = Math.max(20, frequency - 50);
+            frequencySlider.value = frequency;
+            updateSettingsDisplay();
+            saveSettings();
+        } else if (event.key === '1') {
+            settings.waveType = 'sine';
+            saveSettings();
+        } else if (event.key === '2') {
+            settings.waveType = 'square';
+            saveSettings();
+        } else if (event.key === '3') {
+            settings.waveType = 'triangle';
+            saveSettings();
+        } else if (event.key === 'Escape') {
+            amplitude = 0.5;
+            frequency = 440;
+            settings.waveType = 'sine';
+            amplitudeSlider.value = amplitude;
+            frequencySlider.value = frequency;
+            updateSettingsDisplay();
+            saveSettings();
+        }
+    });
     // Обработка кнопок экспорта
     const exportBtns = [
         document.getElementById('exportPng'),
