@@ -9,17 +9,21 @@
     <audio id="loadingSound" src="assets/audio/loading.wav" preload="auto"></audio>
     <audio id="errorSound" src="assets/audio/error.wav" preload="auto"></audio>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <link rel="stylesheet" href="assets/styles.css">
-    <link rel="stylesheet" href="assets/svg-icons.css">
+<link rel="stylesheet" href="css/styles.css">
+<script src="js/script.js"></script>
 </head>
 <body>
-    <!-- Индикатор загрузки (спиннер) -->
+    <!-- Прогресс-бар и индикатор загрузки -->
+    <div id="progressContainer" class="progress-container">
+        <div id="progressBar" class="progress-bar" aria-live="polite" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+        <p id="loadingText" class="loading-text" style="display: none;">Loading...</p>
+    </div>
 
-    
     <div class="container">
-        <div class="wave-container" aria-label="Sound wave visualization">
-            <div id="loadingIndicator" class="loading-spinner" style="display: none;"></div>
-            <canvas id="waveCanvas" class="wave-animation"></canvas>
+        <div class="wave-container" aria-label="Sound wave visualization" style="overflow: visible;">
+            <div id="loadingIndicator" class="loading-spinner" style="display: none;">
+            </div>
+            <canvas id="waveCanvas" class="wave-animation" style="width: 100%; height: auto;"></canvas>
         </div>
         
         <div class="controls">
@@ -62,7 +66,7 @@
     
     <footer class="footer">
         <div class="footer-links">
-            <a href="https://github.com/yourusername/Sound_Wave_Generator" target="_blank" aria-label="github">
+            <a href="https://github.com/vecto01/Sound_Wave_Generator" target="_blank" aria-label="github">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                     <path d="M16 7v16"></path>

@@ -28,9 +28,12 @@ let canvas;
 let ctx;
 let loadingIndicator;
 let loadingSpinner;
+let progressBar;
+let progressContainer;
 let isGenerating = false;
 let oscillator;
 let gainNode;
+let progress = 0;
 
 function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -65,7 +68,7 @@ function initAudio() {
     animateWave();
 }
 
-define drawWave(dataArray) {
+function drawWave(dataArray) {
     const waveHeight = canvas.height / 2;
     const barWidth = (canvas.width / dataArray.length) * 2;
 
@@ -88,7 +91,9 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx = canvas.getContext('2d');
     loadingIndicator = document.getElementById('loadingIndicator');
     loadingSpinner = document.getElementById('loadingSpinner');
-
+    progressBar = document.getElementById('progressBar');
+    progressContainer = document.getElementById('progressContainer');
+    
     if (isDarkTheme) {
         document.body.classList.add('dark-theme');
     }
@@ -149,45 +154,41 @@ document.addEventListener('DOMContentLoaded', function() {
         src: ['assets/audio/loading.wav']
     });
 
+    const successSound = new Howl({
+        src: ['assets/audio/success.wav']
+    });
+
     document.getElementById('generateBtn').addEventListener('click', function() {
         if (isGenerating) return;
 
         isGenerating = true;
         loadingIndicator.style.display = 'flex';
         loadingSpinner.style.display = 'block';
+        progressBar.style.display = 'block';
+        progressContainer.style.display = 'block';
+        progress = 0;
+        progressBar.style.width = '0%';
         loadingSound.play();
 
         function animateLoading() {
             if (!isGenerating) return;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const waveHeight = canvas.height / 2;
-            const barWidth = (canvas.width / 256) * 2;
-            const progress = Math.min(time / 500, 1);
-
-            ctx.beginPath();
-            ctx.moveTo(0, waveHeight);
-            for (let i = 0; i < 256; i++) {
-                const x = i * barWidth;
-                const y = waveHeight - (progress * dataArray[i] * waveHeight / 200);
-                ctx.lineTo(x, y);
-            }
-            ctx.strokeStyle = `rgba(74, 144, 226, ${progress})`;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
+            progress += 0.01;
+            progressBar.style.width = `${progress * 100}%`;
+            
             if (progress < 1) {
-                time += 16;
                 requestAnimationFrame(animateLoading);
             } else {
                 isGenerating = false;
                 loadingIndicator.style.display = 'none';
                 loadingSpinner.style.display = 'none';
-                
+                progressBar.style.display = 'none';
+                progressContainer.style.display = 'none';
+
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const finalWaveHeight = canvas.height / 2;
                 const finalBarWidth = (canvas.width / 256) * 2;
-                
+
                 ctx.beginPath();
                 ctx.moveTo(0, finalWaveHeight);
                 for (let i = 0; i < 256; i++) {
@@ -198,20 +199,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 ctx.strokeStyle = '#4a90e2';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
-                const successSound = new Howl({
-                    src: ['assets/audio/success.wav']
-                });
+
                 try {
                     successSound.play();
                 } catch (e) {
                     console.log('Sound playback failed, continuing with UI feedback');
                 }
-                
+
                 const generateBtn = document.getElementById('generateBtn');
                 generateBtn.classList.add('button-fade-in active');
                 generateBtn.textContent = 'Success!';
-                
+
                 setTimeout(() => {
                     generateBtn.classList.remove('button-fade-in active');
                     generateBtn.textContent = 'Generate Wave';

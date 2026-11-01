@@ -1,0 +1,375 @@
+#!/usr/bin/env node
+// Объединённый стиль для Sound Wave Generator
+
+/* assets/styles.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+    height: 100vh;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+#wave-canvas {
+    width: 100%;
+    max-width: 600px;
+    height: 200px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* assets/micro-animations.css */
+.wave-transition, .wave-transition.active {
+    animation: waveTransition 0.5s ease-in-out;
+}
+
+@keyframes waveTransition {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-10px);
+    }
+}
+
+.wave-color-transition {
+    animation: colorTransition 0.5s ease-in-out;
+}
+
+@keyframes colorTransition {
+    0% {
+        filter: brightness(1);
+    }
+    100% {
+        filter: brightness(0.9);
+    }
+}
+
+/* assets/wave-animations.css */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.preloader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #4CAF50;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+    margin-top: 10px;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+}
+
+/* assets/preloader.css */
+#preloader {
+    display: none;
+    animation: spin 1s linear infinite;
+}
+
+#preloader.active {
+    display: block;
+}
+
+/* assets/dark-theme.css */
+body.dark-theme {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-theme #wave-canvas {
+    background-color: #1e1e1e;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .wave-transition, body.dark-theme .wave-transition.active {
+    animation: waveTransition 0.5s ease-in-out;
+}
+
+body.dark-theme .wave-color-transition {
+    animation: colorTransition 0.5s ease-in-out;
+}
+
+body.dark-theme .loading-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+body.dark-theme .preloader {
+    border-color: #4CAF50;
+}
+
+body.dark-theme .progress-bar-fill {
+    background-color: #4CAF50;
+}
+
+/* assets/focus-styles.css */
+:focus-visible {
+    outline: 2px solid #4CAF50;
+    outline-offset: 2px;
+}
+
+/* assets/svg-icons.css */
+svg {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+}
+
+/* Основной интерфейс */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #ddd;
+    outline: none;
+    margin: 8px 0;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+    cursor: pointer;
+}
+
+.slider-value {
+    text-align: center;
+    font-size: 14px;
+    color: #4CAF50;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #45a049;
+}
+
+.button:focus-visible {
+    outline: 2px solid #4CAF50;
+}
+
+#preset-modal, #error-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+}
+
+#preset-modal-content, #error-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+#preset-modal-title, #error-modal-title {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+#preset-modal-message, #error-modal-message {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+#preset-name-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#preset-modal-buttons, #error-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#close-preset-modal, #close-error-modal {
+    background-color: #f44336;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#error-modal-ok-btn {
+    background-color: #4CAF50;
+}
+
+/* Dark theme adjustments */
+body.dark-theme #preset-modal-content, body.dark-theme #error-modal-content {
+    background-color: #212121;
+    color: #e0e0e0;
+}
+
+body.dark-theme #preset-modal-title, body.dark-theme #error-modal-title {
+    color: #e0e0e0;
+}
+
+body.dark-theme #preset-modal-message, body.dark-theme #error-modal-message {
+    color: #e0e0e0;
+}
+
+body.dark-theme #preset-name-input {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-theme #preset-modal-buttons, body.dark-theme #error-modal-buttons {
+    gap: 10px;
+}
+
+body.dark-theme #close-preset-modal, body.dark-theme #close-error-modal {
+    color: white;
+}
+
+body.dark-theme #error-modal-ok-btn {
+    background-color: #4CAF50;
+    color: black;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    #app {
+        padding: 10px;
+    }
+    .container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    .slider-container {
+        width: 100%;
+    }
+    .slider {
+        width: 100%;
+    }
+    #preset-modal-content, #error-modal-content {
+        margin: 50px auto;
+        padding: 15px;
+    }
+}
+
+/* Адаптивное лого GitHub */
+#github-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#github-logo svg {
+    width: 50px;
+    height: 50px;
+}
+
+/* Адаптивность для слайдеров */
+@media (max-width: 600px) {
+    .slider {
+        height: 8px;
+    }
+    .slider::-webkit-slider-thumb {
+        width: 16px;
+    }
+}
+
+/* Адаптивность для модальных окон */
+@media (max-width: 480px) {
+    #preset-modal-content, #error-modal-content {
+        padding: 15px;
+        margin: 50px auto;
+    }
+    #preset-name-input {
+        width: 100%;
+        padding: 8px;
+    }
+}
