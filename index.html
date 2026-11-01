@@ -13,77 +13,63 @@
     <link rel="stylesheet" href="assets/svg-icons.css">
 </head>
 <body>
-    <!-- Кросс-браузерный тест -->
-    <script src="test/cross-browser-test.js"></script>
-    <div class="loading-overlay" id="loadingIndicator">
-        <div class="loader">
-            <svg class="circular-loader" viewBox="25 25 50 50">
-                <circle class="circle-bg" cx="50" cy="50" r="20" fill="none" stroke="#fff" stroke-width="5"></circle>
-                <circle class="circle" cx="50" cy="50" r="20" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 50 50)"></circle>
-            </svg>
-            <p class="fade-in">Generating Wave...</p>
-        </div>
-    </div>
-    
-    <div class="progress-indicator" id="progressIndicator" style="display: none;">
-        <div class="progress-bar"></div>
-        <p class="progress-text">Generating...</p>
-    </div>
-    
-    <div class="completion-message" id="completionMessage" style="display: none;">
-        <p>Wave generated successfully!</p>
-    </div>
+    <!-- Индикатор загрузки (спиннер) -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
     
     <div class="container">
-        <canvas id="waveCanvas" class="wave-animation" style="display: none;"></canvas>
+        <div class="wave-container" aria-label="Sound wave visualization">
+            <canvas id="waveCanvas" class="wave-animation"></canvas>
+        </div>
+        
         <div class="controls">
-            <div class="button-container">
-                <button class="export-btn button-fade-in button-scale button-icon" id="exportPng" aria-label="export-png">
+            <div class="wave-type-selector">
+                <button class="wave-type-btn button-fade-in button-scale button-icon" id="sineWave" aria-label="sine-wave">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 12h-4l-5 5v5h-4l-4-5V8L4 12h4l3 12h8l3-12z"></path>
                     </svg>
-                    Export as PNG
+                    Sine
                 </button>
-                <button class="export-btn button-fade-in button-scale button-icon" id="exportSvg" aria-label="export-svg">
+                <button class="wave-type-btn button-fade-in button-scale button-icon" id="squareWave" aria-label="square-wave">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 12h-4l-5 5v5h-4l-4-5V8L4 12h4l3 12h8l3-12z"></path>
+                        <path d="M12 2L4 4v16l8 4 8-4V4z"></path>
                     </svg>
-                    Export as SVG
+                    Square
                 </button>
-                <button class="theme-btn button-fade-in button-scale button-icon" id="toggleTheme" aria-label="toggle-theme">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <path d="M12 16v1M12 8v1"></path>
-                    </svg>
-                    Toggle Theme
-                </button>
-                <button class="sound-only-btn button-fade-in button-scale button-icon" id="soundOnlyToggle" aria-label="toggle-sound-only">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-                    </svg>
-                    Toggle Sound Only Mode
-                </button>
-                <span id="soundOnlyLabel" class="sound-only-label">Enable Sound Only Mode</span>
             </div>
+            
+            <button class="generate-btn button-fade-in button-scale button-icon" id="generateBtn" aria-label="generate-wave">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 12h-4l-5 5v5h-4l-4-5V8L4 12h4l3 12h8l3-12z"></path>
+                </svg>
+                Generate Wave
+            </button>
+            
             <div class="controls-sliders">
                 <div class="slider-group">
-                    <label for="frequencySlider">Frequency:</label>
-                    <input type="range" id="frequencySlider" class="slider" min="10" max="2000" value="440">
+                    <label for="frequencySlider" class="label">Frequency:</label>
+                    <input type="range" id="frequencySlider" class="slider" min="10" max="2000" value="440" aria-label="frequency-slider">
                     <span id="frequencyValue" class="value">440 Hz</span>
                 </div>
                 <div class="slider-group">
-                    <label for="amplitudeSlider">Amplitude:</label>
-                    <input type="range" id="amplitudeSlider" class="slider" min="0" max="1" value="0.5">
+                    <label for="amplitudeSlider" class="label">Amplitude:</label>
+                    <input type="range" id="amplitudeSlider" class="slider" min="0" max="1" value="0.5" aria-label="amplitude-slider">
                     <span id="amplitudeValue" class="value">50%</span>
                 </div>
             </div>
         </div>
-        <canvas id="waveCanvas" class="wave-animation" width="800" height="200"></canvas>
     </div>
     
     <footer class="footer">
-        <p>© 2023 Sound Wave Generator. All rights reserved.</p>
-        <p>Generated waves with <a href="https://github.com/yourusername/Sound_Wave_Generator" target="_blank">GitHub</a>.</p>
+        <div class="footer-links">
+            <a href="https://github.com/yourusername/Sound_Wave_Generator" target="_blank" aria-label="github">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <path d="M16 7v16"></path>
+                    <path d="M22 12c0-4.42-4.02-8-9-8a9.86 9.86 0 0 1-2.5 1.6c-.2.1-.5.1-.7.1"></path>
+                </svg>
+                GitHub</a>
+            </div>
+        </div>
         <p>Interactive tool for visualizing sound waves.</p>
     </footer>
     <div class="reduced-motion-notice" id="reducedMotionNotice" style="display: none;">
