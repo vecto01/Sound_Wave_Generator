@@ -34,17 +34,26 @@
   cursor: not-allowed;
 }
 
-/* SVG-контейнеры */
 .btn svg {
   width: 20px;
   height: 20px;
 }
 
+/* Контейнер для основного содержимого */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
 /* Wave container */
 .wave-container {
   position: relative;
-  margin: 30px auto;
-  max-width: 800px;
+  margin: 2rem auto;
+  max-width: 900px;
   height: 200px;
   background-color: white;
   border-radius: 8px;
@@ -53,7 +62,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #4a90e2;
   pointer-events: none;
   margin-bottom: 20px;
 }
@@ -69,15 +77,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 900px;
+  padding: 0 20px;
 }
 
 .button-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 1rem;
   margin-bottom: 1rem;
   width: 100%;
 }
@@ -85,7 +94,8 @@
 .wave-type-selector {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 /* Слайдеры */
@@ -113,73 +123,17 @@
 }
 
 /* Текст и контраст */
-body {
-  font-family: Arial, sans-serif;
-  color: #333333; /* Темно-серый текст для хорошей читаемости */
-  line-height: 1.6;
-  background-color: #f9f9f9; /* Светлый фон для контраста */
-  margin: 0;
-  padding: 0;
+.label {
+  color: #333333;
+  font-weight: 500;
+  font-size: 1rem;
 }
 
-/* Адаптивные медиа-запросы */
-@media (max-width: 768px) {
-  .btn {
-    padding: 8px 15px;
-    width: 100%;
-    margin: 2px;
-  }
-  .slider {
-    width: 100%;
-  }
-  .label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  .value {
-    display: none;
-  }
-  .wave-container {
-    max-width: 100%;
-    height: 120px;
-    margin: 15px 0;
-  }
-  .button-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-  .wave-type-selector {
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-}
-
-/* Footer */
-.footer {
-  margin-top: 2rem;
-  padding: 1rem;
-  background-color: #e9ecef;
-  border-top: 1px solid #dee2e6;
-  text-align: center;
-  width: 100%;
-}
-
-.footer p {
-  margin: 0.5rem 0;
-  font-size: 14px;
-}
-
-.footer a {
+.value {
   color: #4a90e2;
-  text-decoration: none;
   font-weight: bold;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-  color: #357abd;
+  font-size: 1.1rem;
+  margin-top: 2px;
 }
 
 /* Индикатор загрузки */
@@ -204,8 +158,32 @@ body {
   }
 }
 
-/* Адаптивный индикатор загрузки */
+/* Адаптивные медиа-запросы */
 @media (max-width: 768px) {
+  body {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .wave-container {
+    max-width: 100%;
+    height: 120px;
+    margin: 1.5rem auto;
+  }
+  .button-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .wave-type-selector {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .slider {
+    width: 100%;
+  }
   .loading-spinner {
     width: 40px;
     height: 40px;
@@ -213,19 +191,43 @@ body {
   }
 }
 
-/* Контраст для текста */
-.value, .label {
-  color: #333333;
-  font-size: 1.1rem;
+/* Footer */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #e9ecef;
+  border-top: 1px solid #dee2e6;
+  padding: 1rem;
+  text-align: center;
+  z-index: 10;
 }
 
-/* Общий стиль для волны */
-.wave-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer a {
   color: #4a90e2;
-  font-size: 0.8rem;
-  pointer-events: none;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+  color: #357abd;
+}
+
+/* Анимация волны при генерации */
+.wave-pulse {
+  animation: pulseWave 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseWave {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }

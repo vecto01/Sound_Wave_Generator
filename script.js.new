@@ -1,0 +1,72 @@
+    // Логика спиннера загрузки
+    const spinner = document.getElementById('spinner');
+    
+    function showSpinner() {
+        spinner.style.display = 'block';
+    }
+    
+    function hideSpinner() {
+        spinner.style.display = 'none';
+    }
+    
+    // Логика генерации волны
+    let waveAnimationId = null;
+    let isGeneratingWave = false;
+    
+    function generateWave() {
+        if (isGeneratingWave) return;
+        isGeneratingWave = true;
+        showSpinner();
+        
+        // Запуск анимации волны
+        waveAnimationId = requestAnimationFrame(updateWave);
+        
+        // Скрытие спиннера после 1.5 секунд
+        setTimeout(hideSpinner, 1500);
+    }
+    
+    function updateWave() {
+        const frequency = settings.frequency;
+        const amplitude = settings.amplitude;
+        
+        // Логика обновления волны на Canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const bars = 256;
+        const dataArray = new Uint8Array(bars);
+        
+        // Проверка на доступность данных
+        if (!analyzerNode || !analyzerNode.getByteFrequencyData) {
+            console.warn('Audio analysis not available.');
+            return;
+        }
+        
+        analyzerNode.getByteFrequencyData(dataArray);
+        
+        for (let i = 0; i < bars; i++) {
+            const barWidth = (canvas.width / bars) * 2;
+            const barHeight = dataArray[i] * canvas.height / 256;
+            
+            // Проверка на NaN/undefined для корректности
+            if (isNaN(barHeight) || barHeight <= 0) continue;
+            
+            ctx.fillStyle = 'rgba(74, 144, 226, 0.7)';
+            ctx.fillRect(i * barWidth, canvas.height / 2 - barHeight / 2, barWidth, barHeight);
+        }
+        
+        waveAnimationId = requestAnimationFrame(updateWave);
+    }
+    
+    function stopGeneratingWave() {
+        if (waveAnimationId) {
+            cancelAnimationFrame(waveAnimationId);
+            isGeneratingWave = false;
+        }
+    }
+    
+    // Обработка нажатия на кнопки
+    const generateWaveButton = document.getElementById('generateWaveButton');
+    generateWaveButton.addEventListener('click', generateWave);
+    
+    const stopWaveButton = document.getElementById('stopWaveButton');
+    stopWaveButton.addEventListener('click', stopGeneratingWave);

@@ -1,255 +1,81 @@
-const savedSettings = localStorage.getItem('soundWaveSettings');
-let settings = {
-    frequency: 440,
-    amplitude: 0.5,
-    waveType: 'sine',
-    isDarkTheme: false,
-    isSoundOnlyMode: false
-};
-
-if (savedSettings) {
-    try {
-        settings = JSON.parse(savedSettings);
-    } catch (e) {
-        console.error('Ошибка загрузки настроек:', e);
-    }
-}
-
-let isDarkTheme = settings.isDarkTheme;
-let amplitude = settings.amplitude;
-let frequency = settings.frequency;
-let time = 0;
-let volume = 0.7;
-let isSoundOnlyMode = settings.isSoundOnlyMode || false;
-let audioContext;
-let analyzerNode;
-let dataArray;
-let canvas;
-let ctx;
-let loadingIndicator;
-let loadingSpinner;
-let progressBar;
-let progressContainer;
-let isGenerating = false;
-let oscillator;
-let gainNode;
-let progress = 0;
-
-function initAudio() {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    oscillator = audioContext.createOscillator();
-    gainNode = audioContext.createGain();
-
-    oscillator.type = 'sine';
-    oscillator.frequency.value = frequency;
-    oscillator.connect(gainNode);
-    gainNode.gain.value = amplitude * volume;
-    gainNode.connect(audioContext.destination);
-
-    oscillator.start();
-    oscillator.stop = function() {
-        oscillator.stop();
-        isGenerating = false;
-    };
-
-    analyzerNode = audioContext.createAnalyser();
-    oscillator.connect(analyzerNode);
-    analyzerNode.fftSize = 256;
-    dataArray = new Uint8Array(analyzerNode.frequencyBinCount);
-
-    function animateWave() {
-        if (!isSoundOnlyMode) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            analyzerNode.getByteFrequencyData(dataArray);
-            drawWave(dataArray);
-        }
-        requestAnimationFrame(animateWave);
-    }
-    animateWave();
-}
-
-function drawWave(dataArray) {
-    const waveHeight = canvas.height / 2;
-    const barWidth = (canvas.width / dataArray.length) * 2;
-
-    ctx.beginPath();
-    ctx.moveTo(0, waveHeight);
-
-    for (let i = 0; i < dataArray.length; i++) {
-        const x = i * barWidth;
-        const y = waveHeight - dataArray[i] * waveHeight / 200;
-        ctx.lineTo(x, y);
-    }
-
-    ctx.strokeStyle = '#4a90e2';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    canvas = document.getElementById('waveCanvas');
-    ctx = canvas.getContext('2d');
-    loadingIndicator = document.getElementById('loadingIndicator');
-    loadingSpinner = document.getElementById('loadingSpinner');
-    progressBar = document.getElementById('progressBar');
-    progressContainer = document.getElementById('progressContainer');
+    // Логика спиннера загрузки
+    const spinner = document.getElementById('spinner');
+    const loadingOverlay = document.getElementById('loading-overlay');
     
-    if (isDarkTheme) {
-        document.body.classList.add('dark-theme');
+    function showSpinner() {
+        spinner.style.display = 'block';
+        loadingOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
-
-    if (isSoundOnlyMode) {
-        canvas.style.display = 'none';
-        const soundOnlyLabel = document.getElementById('soundOnlyLabel');
-        soundOnlyLabel.textContent = 'Visualization Disabled (Sound Only Mode)';
-    } else {
-        const soundOnlyLabel = document.getElementById('soundOnlyLabel');
-        soundOnlyLabel.textContent = 'Enable Sound Only Mode';
+    
+    function hideSpinner() {
+        spinner.style.display = 'none';
+        loadingOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
-
-    initAudio();
-
-    function updateSettingsDisplay() {
-        const freqPercent = Math.round(frequency * 10);
-        const ampPercent = Math.round(amplitude * 20);
-        document.getElementById('frequencyValue').textContent = `${freqPercent} Hz`;
-        document.getElementById('amplitudeValue').textContent = `${ampPercent}%`;
+    
+    // Логика генерации волны
+    let waveAnimationId = null;
+    let isGeneratingWave = false;
+    
+    function generateWave() {
+        if (isGeneratingWave) return;
+        isGeneratingWave = true;
+        showSpinner();
+        
+        // Анимация появления волны
+        document.getElementById('waveCanvas').style.opacity = '0';
+        document.getElementById('waveCanvas').style.transform = 'scale(0.8)';
+        
+        // Запуск анимации волны
+        waveAnimationId = requestAnimationFrame(updateWave);
+        
+        // Скрытие спиннера после 1.5 секунд
+        setTimeout(hideSpinner, 1500);
     }
-
-    let targetFrequency = 0;
-    let targetAmplitude = 0;
-
-    function animateToTarget(target, current, duration = 500) {
-        const startTime = performance.now();
-        const startValue = current;
-        const delta = target - startValue;
-
-        function animate(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easedProgress = Math.pow(progress, 2);
-            const newValue = startValue + delta * easedProgress;
-
-            if (target === targetFrequency) {
-                frequency = newValue;
-                oscillator.frequency.value = newValue;
-            } else if (target === targetAmplitude) {
-                amplitude = newValue;
-                gainNode.gain.value = newValue * volume;
-            }
-            updateSettingsDisplay();
-
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
+    
+    function updateWave() {
+        const frequency = settings.frequency;
+        const amplitude = settings.amplitude;
+        
+        // Логика обновления волны на Canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const bars = 256;
+        const dataArray = new Uint8Array(bars);
+        
+        // Проверка на доступность данных
+        if (!analyzerNode || !analyzerNode.getByteFrequencyData) {
+            console.warn('Audio analysis not available.');
+            return;
         }
-        requestAnimationFrame(animate);
-    }
-
-    const clickSound = new Howl({
-        src: ['assets/audio/click.wav']
-    });
-
-    const loadingSound = new Howl({
-        src: ['assets/audio/loading.wav']
-    });
-
-    const successSound = new Howl({
-        src: ['assets/audio/success.wav']
-    });
-
-    document.getElementById('generateBtn').addEventListener('click', function() {
-        if (isGenerating) return;
-
-        isGenerating = true;
-        loadingIndicator.style.display = 'flex';
-        loadingSpinner.style.display = 'block';
-        progressBar.style.display = 'block';
-        progressContainer.style.display = 'block';
-        progress = 0;
-        progressBar.style.width = '0%';
-        loadingSound.play();
-
-        function animateLoading() {
-            if (!isGenerating) return;
-
-            progress += 0.01;
-            progressBar.style.width = `${progress * 100}%`;
+        
+        analyzerNode.getByteFrequencyData(dataArray);
+        
+        for (let i = 0; i < bars; i++) {
+            const barWidth = (canvas.width / bars) * 2;
+            const barHeight = dataArray[i] * canvas.height / 256;
             
-            if (progress < 1) {
-                requestAnimationFrame(animateLoading);
-            } else {
-                isGenerating = false;
-                loadingIndicator.style.display = 'none';
-                loadingSpinner.style.display = 'none';
-                progressBar.style.display = 'none';
-                progressContainer.style.display = 'none';
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const finalWaveHeight = canvas.height / 2;
-                const finalBarWidth = (canvas.width / 256) * 2;
-
-                ctx.beginPath();
-                ctx.moveTo(0, finalWaveHeight);
-                for (let i = 0; i < 256; i++) {
-                    const x = i * finalBarWidth;
-                    const y = finalWaveHeight - dataArray[i] * finalWaveHeight / 200;
-                    ctx.lineTo(x, y);
-                }
-                ctx.strokeStyle = '#4a90e2';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                try {
-                    successSound.play();
-                } catch (e) {
-                    console.log('Sound playback failed, continuing with UI feedback');
-                }
-
-                const generateBtn = document.getElementById('generateBtn');
-                generateBtn.classList.add('button-fade-in active');
-                generateBtn.textContent = 'Success!';
-
-                setTimeout(() => {
-                    generateBtn.classList.remove('button-fade-in active');
-                    generateBtn.textContent = 'Generate Wave';
-                }, 2000);
-            }
+            // Проверка на NaN/undefined для корректности
+            if (isNaN(barHeight) || barHeight <= 0) continue;
+            
+            ctx.fillStyle = 'rgba(74, 144, 226, 0.7)';
+            ctx.fillRect(i * barWidth, canvas.height / 2 - barHeight / 2, barWidth, barHeight);
         }
-        animateLoading();
-    });
-
-    document.getElementById('frequencySlider').addEventListener('input', function() {
-        targetFrequency = this.value;
-        animateToTarget(targetFrequency, frequency);
-    });
-
-    document.getElementById('amplitudeSlider').addEventListener('input', function() {
-        targetAmplitude = this.value;
-        animateToTarget(targetAmplitude, amplitude);
-    });
-
-    document.getElementById('toggleTheme').addEventListener('click', function() {
-        isDarkTheme = !isDarkTheme;
-        document.body.classList.toggle('dark-theme');
-        localStorage.setItem('soundWaveSettings', JSON.stringify(settings));
-        clickSound.play();
-    });
-
-    document.getElementById('soundOnlyToggle').addEventListener('click', function() {
-        isSoundOnlyMode = !isSoundOnlyMode;
-        if (isSoundOnlyMode) {
-            canvas.style.display = 'none';
-            const soundOnlyLabel = document.getElementById('soundOnlyLabel');
-            soundOnlyLabel.textContent = 'Visualization Disabled (Sound Only Mode)';
-        } else {
-            canvas.style.display = 'block';
-            const soundOnlyLabel = document.getElementById('soundOnlyLabel');
-            soundOnlyLabel.textContent = 'Enable Sound Only Mode';
+        
+        waveAnimationId = requestAnimationFrame(updateWave);
+    }
+    
+    function stopGeneratingWave() {
+        if (waveAnimationId) {
+            cancelAnimationFrame(waveAnimationId);
+            isGeneratingWave = false;
         }
-        localStorage.setItem('soundWaveSettings', JSON.stringify(settings));
-        clickSound.play();
-    });
-
-    updateSettingsDisplay();
-});
+    }
+    
+    // Обработка нажатия на кнопки
+    const generateWaveButton = document.getElementById('generateBtn');
+    generateWaveButton.addEventListener('click', generateWave);
+    
+    const stopWaveButton = document.getElementById('stopWaveButton');
+    stopWaveButton.addEventListener('click', stopGeneratingWave);
