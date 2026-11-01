@@ -1,38 +1,22 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const canvas = document.getElementById('waveCanvas');
-    const ctx = canvas.getContext('2d');
-    const loadingOverlay = document.querySelector('.loading-overlay');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const footer = document.querySelector('footer');
-    const generateBtn = document.getElementById('generateBtn');
-    const toggleThemeBtn = document.getElementById('toggleTheme');
-    const volumeSlider = document.getElementById('volumeSlider');
-    const volumeValue = document.getElementById('volumeValue');
-    const frequencySlider = document.getElementById('frequencySlider');
-    const amplitudeSlider = document.getElementById('amplitudeSlider');
-    const frequencyValue = document.getElementById('frequencyValue');
-    const amplitudeValue = document.getElementById('amplitudeValue');
-    const soundOnlyToggle = document.getElementById('soundOnlyToggle');
-    const soundOnlyLabel = document.getElementById('soundOnlyLabel');
-    
-    // Загрузка сохранённых настроек
-    const savedSettings = localStorage.getItem('soundWaveSettings');
-    let settings = {
-        frequency: 440,      // Частота по умолчанию
-        amplitude: 0.5,     // Амплитуда по умолчанию
-        waveType: 'sine',   // Тип волны по умолчанию
-        isDarkTheme: false, // Темная тема по умолчанию
-        isSoundOnlyMode: false // Режим "Только звук" по умолчанию
-    };
-    
-    if (savedSettings) {
-        try {
-            settings = JSON.parse(savedSettings);
-        } catch (e) {
-            console.error('Ошибка загрузки настроек:', e);
-        }
+// Основная логика
+
+// Загрузка сохранённых настроек
+const savedSettings = localStorage.getItem('soundWaveSettings');
+let settings = {
+    frequency: 440,      // Частота по умолчанию
+    amplitude: 0.5,     // Амплитуда по умолчанию
+    waveType: 'sine',   // Тип волны по умолчанию
+    isDarkTheme: false, // Темная тема по умолчанию
+    isSoundOnlyMode: false // Режим "Только звук" по умолчанию
+};
+
+if (savedSettings) {
+    try {
+        settings = JSON.parse(savedSettings);
+    } catch (e) {
+        console.error('Ошибка загрузки настроек:', e);
     }
-    
+
     let isDarkTheme = settings.isDarkTheme;
     let amplitude = settings.amplitude;
     let frequency = settings.frequency;
@@ -46,300 +30,131 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Применение режима "Только звук"
     if (isSoundOnlyMode) {
+        const canvas = document.getElementById('waveCanvas');
         canvas.style.display = 'none';
+        const soundOnlyLabel = document.getElementById('soundOnlyLabel');
         soundOnlyLabel.textContent = 'Visualization Disabled (Sound Only Mode)';
     } else {
+        const soundOnlyLabel = document.getElementById('soundOnlyLabel');
         soundOnlyLabel.textContent = 'Enable Sound Only Mode';
     }
-    }
 
-    // Звуковые эффекты
-    const clickSound = new Howl({
-        src: ['assets/audio/click.wav']
-    });
-    
-    const loadingSound = new Howl({
-        src: ['assets/audio/loading.wav']
-    });
-    
-    const errorSound = new Howl({
-        src: ['assets/audio/error.wav']
-    });
-    
-    // Обновление отображения настроек
-    function updateSettingsDisplay() {
-        const freqPercent = Math.round(frequency * 10);
-        const ampPercent = Math.round(amplitude * 20);
-        frequencyValue.textContent = `${freqPercent} Hz`;
-        amplitudeValue.textContent = `${ampPercent}%`;
-    }
-    
-    // Настройка обработчиков слайдеров
-    frequencySlider.addEventListener('input', function() {
-        frequency = parseFloat(this.value);
-        updateSettingsDisplay();
-        saveSettings();
-    });
-    
-    amplitudeSlider.addEventListener('input', function() {
-        amplitude = parseFloat(this.value);
-        updateSettingsDisplay();
-        saveSettings();
-    });
-    
-    // Сохранение настроек в localStorage
-    function saveSettings() {
-        const updatedSettings = {
-            frequency: frequency,
-            amplitude: amplitude,
-            waveType: settings.waveType,
-            isDarkTheme: isDarkTheme,
-            isSoundOnlyMode: isSoundOnlyMode
-        };
-        localStorage.setItem('soundWaveSettings', JSON.stringify(updatedSettings));
-    }
-    
-    // Загрузка сохранённой громкости
-    if (savedVolume) {
-        volume = parseFloat(savedVolume);
-        volumeSlider.value = volume;
-    }
-
-    // Обновление отображения громкости
-    function updateVolumeDisplay() {
-        const percentage = Math.round(volume * 100);
-        volumeValue.textContent = `${percentage}%`;
-    }
-
-    // Настройка обработчика для слайдера
-    volumeSlider.addEventListener('input', function() {
-        volume = parseFloat(this.value);
-        updateVolumeDisplay();
-        localStorage.setItem('soundWaveVolume', volume);
-        clickSound.volume(volume);
-        loadingSound.volume(volume);
-        errorSound.volume(volume);
-    });
-
-    // Применение сохранённой громкости к звукам
-    clickSound.volume(volume);
-    loadingSound.volume(volume);
-    errorSound.volume(volume);
-    updateVolumeDisplay();
-
-    // Инициализация
-    function init() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-    }
-
-    // Показ лоадера
-    function showLoading() {
-        loadingOverlay.classList.add('show');
-        loadingIndicator.classList.add('show');
-        canvas.style.display = 'none';
-        canvas.style.opacity = '0';
-        canvas.style.transform = 'scale(0.9)';
-    }
-
-    // Скрытие лоадера и показ волны
-    function hideLoading() {
-        loadingOverlay.classList.remove('show');
-        loadingIndicator.classList.remove('show');
-        footer.classList.add('show');
-        canvas.style.opacity = '1';
-        canvas.style.transform = 'scale(1)';
-        generateBtn.disabled = false;
-        generateBtn.classList.remove('loading');
-    }
-
-    // Генерация волны
-    function generateWave() {
-        const generatingIndicator = document.getElementById('generatingIndicator');
-        generatingIndicator.style.display = 'flex';
-        loadingSound.play();
-        showLoading();
-
-        const progressIndicator = document.getElementById('progressIndicator');
-        progressIndicator.style.display = 'flex';
-
-        // Передача настроек в audio_generator.js
-        window.updateSettings({
-            frequency: frequency,
-            amplitude: amplitude,
-            waveType: settings.waveType
-        });
-
-        generateSound(progress => {
-            const progressBar = progressIndicator.querySelector('.progress-bar::after');
-            progressBar.style.width = `${progress}%`;
-            progressIndicator.querySelector('.progress-text').textContent = `Generating... ${progress}%`;
-
-            if (progress >= 100) {
-                setTimeout(() => {
-                    hideLoading();
-                    const completionMessage = document.getElementById('completionMessage');
-                    completionMessage.style.display = 'flex';
-                    generatingIndicator.style.display = 'none';
-                    setTimeout(() => {
-                        completionMessage.style.display = 'none';
-                    }, 2000);
-                }, 500);
-            }
-        });
-
-        setTimeout(() => {
-            canvas.classList.add('fade-in');
-            drawWave();
-        }, 500);
-    }
-
-    // Рисование волны
-    function drawWave() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--wave-color');
-        ctx.lineWidth = 2;
-
-        for (let x = 0; x < canvas.width; x++) {
-            const y = Math.sin(x / amplitude + time) * amplitude + canvas.height / 2;
-            if (x === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        }
-
-        ctx.stroke();
-        time += 0.05;
-        requestAnimationFrame(drawWave);
-    }
-
-    // Переключение тем
-    function toggleTheme() {
-        isDarkTheme = !isDarkTheme;
-        document.body.classList.toggle('dark-theme', isDarkTheme);
-        toggleThemeBtn.textContent = isDarkTheme ? 'Toggle Light Theme' : 'Toggle Dark Theme';
-        settings.isDarkTheme = isDarkTheme;
-        saveSettings();
-    }
-
-    // События
-    generateBtn.addEventListener('click', function() {
-        clickSound.play();
-        generateBtn.disabled = true;
-        generateBtn.classList.add('loading');
-        generateWave();
-    });
-
-    toggleThemeBtn.addEventListener('click', function() {
-        clickSound.play();
-        toggleThemeBtn.disabled = true;
-        toggleTheme();
-        setTimeout(() => {
-            toggleThemeBtn.disabled = false;
-        }, 300);
-    });
-
-    // Обновление настроек при переключении тем
-    if (isDarkTheme) {
-        document.body.classList.add('dark-theme');
-
-    // Обработка переключения режима "Только звук"
-    soundOnlyToggle.addEventListener('click', function() {
-        clickSound.play();
-        soundOnlyToggle.disabled = true;
-        isSoundOnlyMode = !isSoundOnlyMode;
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const footer = document.querySelector('footer');
+        const generateBtn = document.getElementById('generateBtn');
+        const toggleThemeBtn = document.getElementById('toggleTheme');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const frequencySlider = document.getElementById('frequencySlider');
+        const amplitudeSlider = document.getElementById('amplitudeSlider');
+        const frequencyValue = document.getElementById('frequencyValue');
+        const amplitudeValue = document.getElementById('amplitudeValue');
+        const soundOnlyToggle = document.getElementById('soundOnlyToggle');
+        const soundOnlyLabel = document.getElementById('soundOnlyLabel');
         
-        if (isSoundOnlyMode) {
-            canvas.style.display = 'none';
-            soundOnlyLabel.textContent = 'Visualization Disabled (Sound Only Mode)';
-        } else {
-            canvas.style.display = '';
-            soundOnlyLabel.textContent = 'Enable Sound Only Mode';
+        // Обновление отображения настроек
+        function updateSettingsDisplay() {
+            const freqPercent = Math.round(frequency * 10);
+            const ampPercent = Math.round(amplitude * 20);
+            frequencyValue.textContent = `${freqPercent} Hz`;
+            amplitudeValue.textContent = `${ampPercent}%`;
         }
-        saveSettings();
-        setTimeout(() => {
-            soundOnlyToggle.disabled = false;
-        }, 300);
-    });
-    }
-
-    // Обработка горячих клавиш
-    document.addEventListener('keydown', function(event) {
-        if (event.ctrlKey && event.key === 'ArrowUp') {
-            amplitude = Math.min(1, amplitude + 0.05);
-            amplitudeSlider.value = amplitude;
-            updateSettingsDisplay();
-            saveSettings();
-        } else if (event.ctrlKey && event.key === 'ArrowDown') {
-            amplitude = Math.max(0, amplitude - 0.05);
-            amplitudeSlider.value = amplitude;
-            updateSettingsDisplay();
-            saveSettings();
-        } else if (event.key === 'ArrowUp') {
-            frequency = Math.min(1000, frequency + 50);
-            frequencySlider.value = frequency;
-            updateSettingsDisplay();
-            saveSettings();
-        } else if (event.key === 'ArrowDown') {
-            frequency = Math.max(20, frequency - 50);
-            frequencySlider.value = frequency;
-            updateSettingsDisplay();
-            saveSettings();
-        } else if (event.key === '1') {
-            settings.waveType = 'sine';
-            saveSettings();
-        } else if (event.key === '2') {
-            settings.waveType = 'square';
-            saveSettings();
-        } else if (event.key === '3') {
-            settings.waveType = 'triangle';
-            saveSettings();
-        } else if (event.key === 'Escape') {
-            amplitude = 0.5;
-            frequency = 440;
-            settings.waveType = 'sine';
-            amplitudeSlider.value = amplitude;
-            frequencySlider.value = frequency;
-            updateSettingsDisplay();
-            saveSettings();
+        
+        // Анимация плавного изменения параметров
+        let isAnimatingFrequency = false;
+        let isAnimatingAmplitude = false;
+        let targetFrequency = 0;
+        let targetAmplitude = 0;
+        
+        function animateToTarget(target, current, duration = 500) {
+            const startTime = performance.now();
+            const startValue = current;
+            const delta = target - startValue;
+            
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeInOutQuad(progress);
+                const newValue = startValue + delta * easedProgress;
+                
+                if (target === targetFrequency) {
+                    frequency = newValue;
+                } else if (target === targetAmplitude) {
+                    amplitude = newValue;
+                }
+                updateSettingsDisplay();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            requestAnimationFrame(animate);
         }
-    });
-    // Обработка кнопок экспорта
-    const exportBtns = [
-        document.getElementById('exportPng'),
-        document.getElementById('exportSvg')
-    ];
-
-    exportBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
+        
+        // Звуковые эффекты
+        const clickSound = new Howl({
+            src: ['assets/audio/click.wav']
+        });
+        
+        const loadingSound = new Howl({
+            src: ['assets/audio/loading.wav']
+        });
+        
+        const errorSound = new Howl({
+            src: ['assets/audio/error.wav']
+        });
+        
+        // Обновление отображения настроек при изменении параметров
+        frequencySlider.addEventListener('input', function() {
+            targetFrequency = this.value;
+            animateToTarget(targetFrequency, frequency);
+        });
+        
+        amplitudeSlider.addEventListener('input', function() {
+            targetAmplitude = this.value;
+            animateToTarget(targetAmplitude, amplitude);
+        });
+        
+        // Генерация волны
+        generateBtn.addEventListener('click', function() {
+            if (loadingIndicator.style.display === 'none') {
+                loadingIndicator.style.display = 'block';
+                loadingSound.play();
+            }
+        });
+        
+        // Функция для генерации волны
+        function generateWave() {
+            // Логика генерации волны
+            // ... 
+        }
+        
+        // Toggle Theme
+        toggleThemeBtn.addEventListener('click', function() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('soundWaveSettings', JSON.stringify(settings));
             clickSound.play();
         });
-    });
-
-    // Инициализация при загрузке
-    window.addEventListener('resize', () => {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-    });
-
-    // Автоматическая генерация волны при загрузке страницы
-    setTimeout(() => {
-        generateWave();
-    }, 500);
-
-    // Обработка генерации звука
-    function generateSound(callback) {
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            if (progress >= 100) {
-                clearInterval(interval);
-                callback(100);
+        
+        // Toggle Sound Only Mode
+        soundOnlyToggle.addEventListener('click', function() {
+            isSoundOnlyMode = !isSoundOnlyMode;
+            if (isSoundOnlyMode) {
+                canvas.style.display = 'none';
+                soundOnlyLabel.textContent = 'Visualization Disabled (Sound Only Mode)';
             } else {
-                callback(progress);
+                canvas.style.display = 'block';
+                soundOnlyLabel.textContent = 'Enable Sound Only Mode';
             }
-        }, 100);
-    }
-});
+            localStorage.setItem('soundWaveSettings', JSON.stringify(settings));
+            clickSound.play();
+        });
+        
+        // Обновление отображения настроек
+        updateSettingsDisplay();
+    });

@@ -9,7 +9,8 @@
     <audio id="loadingSound" src="assets/audio/loading.wav" preload="auto"></audio>
     <audio id="errorSound" src="assets/audio/error.wav" preload="auto"></audio>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/svg-icons.css">
 </head>
 <body>
     <!-- Кросс-браузерный тест -->
@@ -36,26 +37,50 @@
     <div class="container">
         <canvas id="waveCanvas" class="wave-animation" style="display: none;"></canvas>
         <div class="controls">
-            <button id="generateBtn" class="button-fade-in button-scale">Generate Wave</button>
-            <div class="volume-control">
-                <span class="volume-label">Volume:</span>
-                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
-                <span id="volumeValue" class="volume-value">70%</span>
-            </div>
-            <div id="generatingIndicator" class="generating-indicator" style="display: none;">
-                <div class="indicator-dot"></div>
-            </div>
             <div class="button-container">
-                <button class="export-btn button-fade-in button-scale" id="exportPng">Export as PNG</button>
-                <button class="export-btn button-fade-in button-scale" id="exportSvg">Export as SVG</button>
-                <button class="theme-btn button-fade-in button-scale" id="toggleTheme">Toggle Theme</button>
-                <button class="sound-only-btn button-fade-in button-scale" id="soundOnlyToggle">Toggle Sound Only Mode</button>
+                <button class="export-btn button-fade-in button-scale button-icon" id="exportPng" aria-label="export-png">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 12h-4l-5 5v5h-4l-4-5V8L4 12h4l3 12h8l3-12z"></path>
+                    </svg>
+                    Export as PNG
+                </button>
+                <button class="export-btn button-fade-in button-scale button-icon" id="exportSvg" aria-label="export-svg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 12h-4l-5 5v5h-4l-4-5V8L4 12h4l3 12h8l3-12z"></path>
+                    </svg>
+                    Export as SVG
+                </button>
+                <button class="theme-btn button-fade-in button-scale button-icon" id="toggleTheme" aria-label="toggle-theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <path d="M12 16v1M12 8v1"></path>
+                    </svg>
+                    Toggle Theme
+                </button>
+                <button class="sound-only-btn button-fade-in button-scale button-icon" id="soundOnlyToggle" aria-label="toggle-sound-only">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+                    </svg>
+                    Toggle Sound Only Mode
+                </button>
                 <span id="soundOnlyLabel" class="sound-only-label">Enable Sound Only Mode</span>
             </div>
+            <div class="controls-sliders">
+                <div class="slider-group">
+                    <label for="frequencySlider">Frequency:</label>
+                    <input type="range" id="frequencySlider" class="slider" min="10" max="2000" value="440">
+                    <span id="frequencyValue" class="value">440 Hz</span>
+                </div>
+                <div class="slider-group">
+                    <label for="amplitudeSlider">Amplitude:</label>
+                    <input type="range" id="amplitudeSlider" class="slider" min="0" max="1" value="0.5">
+                    <span id="amplitudeValue" class="value">50%</span>
+                </div>
+            </div>
         </div>
+        <canvas id="waveCanvas" class="wave-animation" width="800" height="200"></canvas>
     </div>
     
-    <script src="script.js"></script>
     <footer class="footer">
         <p>© 2023 Sound Wave Generator. All rights reserved.</p>
         <p>Generated waves with <a href="https://github.com/yourusername/Sound_Wave_Generator" target="_blank">GitHub</a>.</p>
@@ -64,6 +89,6 @@
     <div class="reduced-motion-notice" id="reducedMotionNotice" style="display: none;">
         Reduced motion mode is enabled. Wave animations are disabled for better performance.
     </div>
-    </body>
-    </html>
+    <script src="script.js"></script>
+</body>
 </html>
