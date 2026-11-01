@@ -1,4 +1,6 @@
-/** Иконки в кнопках с высоким контрастом */
+# Импортируем библиотеку GSAP для анимаций
+
+/* Иконки в кнопках с высоким контрастом */
 .button-icon {
   display: flex;
   align-items: center;
@@ -30,108 +32,125 @@
   stroke: none;
 }
 
-/* Адаптивные отступы */
-@media (max-width: 768px) {
-  .button-icon {
-    width: 100%;
-    margin-bottom: 8px;
-  }
-  .controls {
-    padding: clamp(10px, 16px, 24px);
-    padding-bottom: clamp(16px, 20px, 32px);
-  }
-  .button-container {
-    gap: clamp(10px, 12px, 16px);
-    max-width: clamp(250px, 300px, 400px);
-  }
-  .slider-group {
-    margin-bottom: clamp(8px, 12px, 16px);
-  }
-  #frequency-value, #amplitude-value {
+/* Индикатор загрузки (спиннер) */
+.load-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3b82f6;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.wave-container {
+    position: relative;
+    overflow: hidden;
+    height: clamp(200px, 300px, 400px);
+    margin: 20px auto;
+    max-width: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wave-animation {
+    display: block;
+    background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+    height: 100%;
+    animation: wavePulse 2s ease-in-out infinite;
+    transform-origin: bottom center;
+    animation-fill-mode: forwards;
+}
+
+@keyframes wavePulse {
+    0%, 100% { background-position: 0 0; }
+    50% { background-position: 0 100%; }
+}
+
+/* Адаптивный footer */
+.footer {
+    padding: 16px;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 20px;
+}
+
+.footer-links {
+    margin-bottom: 10px;
+}
+
+.footer p {
+    color: #6b7280; /* Контраст для улучшения доступности */
+    margin-top: 10px;
     font-size: clamp(14px, 16px, 18px);
-    max-width: 120px;
-  }
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-input[type="range"] {
-  width: 100%;
-  margin: clamp(4px, 8px, 12px) 0;
-  height: clamp(4px, 6px, 8px);
-  -webkit-appearance: none;
-  background: #e5e7eb;
-  border-radius: clamp(2px, 3px, 4px);
-  outline: none;
-  transition: background 0.2s ease;
-  min-width: clamp(150px, 100%, 200px);
-  max-width: 250px;
-  touch-action: pan-y;
+/* Адаптивность для всех устройств */
+@media (max-width: 768px) {
+    .wave-container {
+        height: clamp(150px, 200px, 250px);
+    }
+    .controls {
+        padding: 10px;
+    }
+    .footer {
+        padding: 10px;
+        text-align: center;
+    }
+    .footer-links {
+        margin-bottom: 10px;
+    }
+    .footer p {
+        font-size: clamp(12px, 14px, 16px);
+    }
+    .button-icon {
+        margin-bottom: 8px;
+    }
 }
 
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: clamp(16px, 20px, 24px);
-  height: clamp(16px, 20px, 24px);
-  background: #3b82f6;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 0 2px white;
-  margin-top: -1px;
-  transition: transform 0.1s ease;
+@media (max-width: 480px) {
+    .wave-container {
+        height: clamp(120px, 150px, 200px);
+    }
+    .footer p {
+        font-size: clamp(10px, 12px, 14px);
+    }
+    .container {
+        padding: 8px;
+    }
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  background: #2563eb;
-  transition: transform 0.1s ease;
+/* Контраст для кнопок и элементов управления */
+.button-fade-in {
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-input[type="range"]::-webkit-slider-thumb:active {
-  transform: scale(1.1);
-  background: #1d4ed8;
-  transition: transform 0.1s ease;
+.button-fade-in.active {
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
-input[type="range"]::-moz-range-thumb {
-  width: clamp(16px, 20px, 24px);
-  height: clamp(16px, 20px, 24px);
-  background: #3b82f6;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 0 2px white;
-  transition: transform 0.1s ease;
+.footer-links a {
+    color: #3b82f6; /* Синий для высокого контраста */
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
-input[type="range"]::-moz-range-thumb:hover {
-  transform: scale(1.2);
-  background: #2563eb;
-  transition: transform 0.1s ease;
-}
-
-input[type="range"]::-moz-range-thumb:active {
-  transform: scale(1.1);
-  background: #1d4ed8;
-  transition: transform 0.1s ease;
-}
-
-input[type="range"]::-ms-thumb {
-  width: clamp(16px, 20px, 24px);
-  height: clamp(16px, 20px, 24px);
-  background: #3b82f6;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 0 2px white;
-  transition: transform 0.1s ease;
-}
-
-input[type="range"]::-ms-thumb:hover {
-  transform: scale(1.2);
-  background: #2563eb;
-  transition: transform 0.1s ease;
-}
-
-input[type="range"]::-ms-thumb:active {
-  transform: scale(1.1);
-  background: #1d4ed8;
-  transition: transform 0.1s ease;
+.footer-links a:hover {
+    color: #2563eb;
+    text-decoration: underline;
 }

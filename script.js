@@ -1,4 +1,3 @@
-// Основная логика
 const savedSettings = localStorage.getItem('soundWaveSettings');
 let settings = {
     frequency: 440,
@@ -30,12 +29,13 @@ let ctx;
 let loadingIndicator;
 let loadingSpinner;
 let isGenerating = false;
+let oscillator;
+let gainNode;
 
-// Инициализация Web Audio API
 function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    oscillator = audioContext.createOscillator();
+    gainNode = audioContext.createGain();
 
     oscillator.type = 'sine';
     oscillator.frequency.value = frequency;
@@ -49,13 +49,11 @@ function initAudio() {
         isGenerating = false;
     };
 
-    // Анализируем звук для визуализации
     analyzerNode = audioContext.createAnalyser();
     oscillator.connect(analyzerNode);
     analyzerNode.fftSize = 256;
     dataArray = new Uint8Array(analyzerNode.frequencyBinCount);
 
-    // Обновляем волну каждые 16мс
     function animateWave() {
         if (!isSoundOnlyMode) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -67,7 +65,7 @@ function initAudio() {
     animateWave();
 }
 
-function drawWave(dataArray) {
+define drawWave(dataArray) {
     const waveHeight = canvas.height / 2;
     const barWidth = (canvas.width / dataArray.length) * 2;
 
@@ -88,15 +86,13 @@ function drawWave(dataArray) {
 document.addEventListener('DOMContentLoaded', function() {
     canvas = document.getElementById('waveCanvas');
     ctx = canvas.getContext('2d');
-    loadingIndicator = document.querySelector('.loading-overlay');
+    loadingIndicator = document.getElementById('loadingIndicator');
     loadingSpinner = document.getElementById('loadingSpinner');
 
-    // Применение начальной темной темы
     if (isDarkTheme) {
         document.body.classList.add('dark-theme');
     }
 
-    // Применение режима "Только звук"
     if (isSoundOnlyMode) {
         canvas.style.display = 'none';
         const soundOnlyLabel = document.getElementById('soundOnlyLabel');
@@ -106,10 +102,8 @@ document.addEventListener('DOMContentLoaded', function() {
         soundOnlyLabel.textContent = 'Enable Sound Only Mode';
     }
 
-    // Инициализация Web Audio API
     initAudio();
 
-    // Обновление отображения настроек
     function updateSettingsDisplay() {
         const freqPercent = Math.round(frequency * 10);
         const ampPercent = Math.round(amplitude * 20);
@@ -117,9 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('amplitudeValue').textContent = `${ampPercent}%`;
     }
 
-    // Анимация плавного изменения параметров
-    let isAnimatingFrequency = false;
-    let isAnimatingAmplitude = false;
     let targetFrequency = 0;
     let targetAmplitude = 0;
 
@@ -131,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function animate(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const easedProgress = Math.pow(progress, 2); // easeInOutQuad
+            const easedProgress = Math.pow(progress, 2);
             const newValue = startValue + delta * easedProgress;
 
             if (target === targetFrequency) {
@@ -150,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(animate);
     }
 
-    // Звуковые эффекты
     const clickSound = new Howl({
         src: ['assets/audio/click.wav']
     });
@@ -159,22 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
         src: ['assets/audio/loading.wav']
     });
 
-    const errorSound = new Howl({
-        src: ['assets/audio/error.wav']
-    });
-
-    // Обновление отображения настроек при изменении параметров
-    document.getElementById('frequencySlider').addEventListener('input', function() {
-        targetFrequency = this.value;
-        animateToTarget(targetFrequency, frequency);
-    });
-
-    document.getElementById('amplitudeSlider').addEventListener('input', function() {
-        targetAmplitude = this.value;
-        animateToTarget(targetAmplitude, amplitude);
-    });
-
-    // Генерация волны и индикатор загрузки
     document.getElementById('generateBtn').addEventListener('click', function() {
         if (isGenerating) return;
 
@@ -183,14 +157,13 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingSpinner.style.display = 'block';
         loadingSound.play();
 
-        // Добавим анимацию заполнения волны
         function animateLoading() {
             if (!isGenerating) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const waveHeight = canvas.height / 2;
             const barWidth = (canvas.width / 256) * 2;
-            const progress = Math.min(time / 500, 1); // Заполнение за 500мс
+            const progress = Math.min(time / 500, 1);
 
             ctx.beginPath();
             ctx.moveTo(0, waveHeight);
@@ -210,12 +183,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 isGenerating = false;
                 loadingIndicator.style.display = 'none';
                 loadingSpinner.style.display = 'none';
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const finalWaveHeight = canvas.height / 2;
+                const finalBarWidth = (canvas.width / 256) * 2;
+                
+                ctx.beginPath();
+                ctx.moveTo(0, finalWaveHeight);
+                for (let i = 0; i < 256; i++) {
+                    const x = i * finalBarWidth;
+                    const y = finalWaveHeight - dataArray[i] * finalWaveHeight / 200;
+                    ctx.lineTo(x, y);
+                }
+                ctx.strokeStyle = '#4a90e2';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                const successSound = new Howl({
+                    src: ['assets/audio/success.wav']
+                });
+                try {
+                    successSound.play();
+                } catch (e) {
+                    console.log('Sound playback failed, continuing with UI feedback');
+                }
+                
+                const generateBtn = document.getElementById('generateBtn');
+                generateBtn.classList.add('button-fade-in active');
+                generateBtn.textContent = 'Success!';
+                
+                setTimeout(() => {
+                    generateBtn.classList.remove('button-fade-in active');
+                    generateBtn.textContent = 'Generate Wave';
+                }, 2000);
             }
         }
         animateLoading();
     });
 
-    // Toggle Theme
+    document.getElementById('frequencySlider').addEventListener('input', function() {
+        targetFrequency = this.value;
+        animateToTarget(targetFrequency, frequency);
+    });
+
+    document.getElementById('amplitudeSlider').addEventListener('input', function() {
+        targetAmplitude = this.value;
+        animateToTarget(targetAmplitude, amplitude);
+    });
+
     document.getElementById('toggleTheme').addEventListener('click', function() {
         isDarkTheme = !isDarkTheme;
         document.body.classList.toggle('dark-theme');
@@ -223,7 +238,6 @@ document.addEventListener('DOMContentLoaded', function() {
         clickSound.play();
     });
 
-    // Toggle Sound Only Mode
     document.getElementById('soundOnlyToggle').addEventListener('click', function() {
         isSoundOnlyMode = !isSoundOnlyMode;
         if (isSoundOnlyMode) {
@@ -239,6 +253,5 @@ document.addEventListener('DOMContentLoaded', function() {
         clickSound.play();
     });
 
-    // Обновление отображения настроек
     updateSettingsDisplay();
 });
